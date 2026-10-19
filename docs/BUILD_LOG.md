@@ -21,17 +21,17 @@
 ### 2. Domain Modeling & Routing Engine (`2026-10-19T16:08:00+05:30`)
 - Defined strict TypeScript interfaces in `src/domain/types.ts` (`CampusNode`, `CampusEdge`, `RouteProfile`, `Barrier`, `RouteResult`, `CostBreakdown`, `AccessDebtReport`).
 - Configured 5 distinct mobility presets in `src/domain/profiles.ts` (`fastest`, `step_free`, `low_vision`, `low_sensory`, `shade_rest`).
-- Authored synthetic Ashoka University topology in `src/data/demoCampus.ts` (16 nodes, 18 edges, multi-floor Science Complex with stairs, passenger lift, and courtyard covered ramp bridge).
-- Created 8 calibrated campus benchmark scenarios in `src/data/scenarios.ts`.
+- Authored synthetic demo campus topology in `src/data/demoCampus.ts` (16 nodes, 18 edges, multi-floor Science Complex with stairs, passenger lift, and courtyard covered ramp bridge).
+- Created 8 deterministic synthetic benchmark scenarios in `src/data/scenarios.ts`.
 - Implemented hard constraint filter (`src/domain/constraints.ts`) enforcing zero stairs, elevator working status, slope limits, and path widths.
 - Implemented multi-objective soft cost evaluator (`src/domain/routeEngine.ts`) with normalized weights for time, incline, lighting, sensory load, and shade.
 - Built deterministic Dijkstra search with 4-key lexicographical tie-breaking (`[Cost, Time, Distance, NodeID]`) preventing route oscillation.
 - Developed the Access Debt engine (`src/domain/accessDebt.ts`), formulating the `accessPenalty` ratio and counterfactual repair ranking algorithm.
 
-### 3. Algorithmic Unit Tests & Vitest v8 Coverage Gate (`2026-10-19T16:11:00+05:30`)
-- Authored unit test suites for constraints, routeEngine, and accessDebt.
-- Achieved **95.82% statement coverage**, **89.55% branch coverage**, and **100% function coverage** across pure domain logic.
-- Verified that all 27 unit tests pass deterministically in under 1.5 seconds.
+### 3. Initial Domain Unit Tests & Vitest Coverage Gate (Historical Milestone, `2026-10-19T16:11:00+05:30`)
+- Authored initial unit test suites for constraints, routeEngine, and accessDebt.
+- Achieved **95.82% statement coverage**, **89.55% branch coverage**, and **100% function coverage** across pure domain logic (historical initial 27 tests).
+- Verified that all 27 initial unit tests passed deterministically. *(Note: current comprehensive test suite encompasses 36/36 tests, 94.07% statements, 89.4% branches, 100% functions, 94.07% lines).*
 
 ### 4. Civic UI Components, Accessible SVG Campus Map & Storage (`2026-10-19T16:17:00+05:30`)
 - Built accessible design tokens in `src/styles/index.css` with civic color palette (`#F8F7F4` canvas, `#164E35` civic green, `#1B6494` route blue, `#B45309` amber).
@@ -43,12 +43,12 @@
 - Implemented `src/components/AddBarrierModal.tsx` with accessible focus trapping and form validation.
 - Configured local browser persistence in `src/services/storage.ts` and service worker caching in `public/sw.js`.
 
-### 5. Playwright E2E Multi-Viewport Test Suite & Axe WCAG 2.2 AA Audit (`2026-10-19T16:26:00+05:30`)
+### 5. Playwright E2E Multi-Viewport Test Suite & Axe WCAG 2.2 AA Audit (Historical Milestone, `2026-10-19T16:26:00+05:30`)
 - Configured Playwright for 5 responsive viewports: Mobile Small (320px), Mobile Standard (390px), Tablet (768px), Desktop HD (1280px), Desktop Large (1920px).
 - Authored `tests/e2e/accessibility.spec.ts` testing the 75-second signature journey (Stairs $\rightarrow$ Lift $\rightarrow$ Courtyard Ramp Detour $\rightarrow$ Access Debt Ranking $\rightarrow$ Simulated Repair).
 - Integrated `@axe-core/playwright` automated accessibility audits across both Planner and Access Debt views.
 - Resolved subtle contrast and label-in-name requirements (WCAG 2.5.3), achieving **0 violations** across all viewports.
-- All 15 Playwright E2E tests pass in 9.5 seconds.
+- Historical initial test run: 15 tests passed in 9.5 seconds. *(Note: current comprehensive E2E suite executes 45 test runs across 5 viewports with 100% pass rate).*
 
 ### 6. High-Resolution Screenshot Capture & Architecture SVG Authoring (`2026-10-19T16:31:00+05:30`)
 - Created automated screenshot capture script `scripts/capture-screenshots.ts`.

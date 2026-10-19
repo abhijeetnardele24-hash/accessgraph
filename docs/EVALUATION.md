@@ -3,7 +3,7 @@
 > **Empirical Quality & Benchmark Audit**  
 > **Evaluation Date:** 19 October 2026  
 > **Target Event:** EurekaDev 2026 (Coding Track / Problem in the Community)  
-> **Verification Status:** 36 Unit/Component Tests (100% Pass, 94.07% Stmts) • 9 Distinct E2E Test Definitions across 5 Viewports (45 Total Executions, 100% Pass) • 0 Axe WCAG 2.2 AA Violations
+> **Verification Status:** 36 Unit/Component Tests (100% Pass, 94.07% Stmts, 89.4% Branches) • 9 Distinct E2E Test Definitions across 5 Viewports (45 Total Executions, 100% Pass) • 0 Axe Violations in 5 Tested States
 
 ---
 
@@ -12,7 +12,7 @@
 AccessGraph was evaluated against three rigorous criteria:
 1. **Mathematical Determinism & Constraint Adherence:** Verifying that route calculation strictly honors hard safety limits (zero stairs on step-free, maximum slope thresholds, clear path width, barrier evaluation time windows) and generates identical paths across repeated invocations and randomized edge ordering.
 2. **Access Debt Efficacy:** Demonstrating that the system correctly pinpoints high-impact physical bottlenecks and ranks capital repair candidates to maximize network-wide accessibility and travel time recovery.
-3. **Execution Performance & Robustness:** Providing client-side calculation (median single-route latency of 0.022ms; median 8-scenario audit latency of 0.561ms) and 100% offline functionality via Service Worker caching.
+3. **Execution Performance & Robustness:** Providing client-side calculation (median single-route latency of 0.022ms; median 8-scenario audit latency of 0.561ms). The installed Service Worker passed automated offline reload testing after an initial online load.
 
 ---
 
@@ -22,7 +22,7 @@ AccessGraph grounds its multi-objective routing and Access Debt metrics in autho
 - **World Health Organization (WHO):** *World Report on Disability* (2011) documents physical infrastructure and transit disparities as compounding systemic barriers to higher education and civic life.
 - **UNICEF:** *Accessible and Inclusive Infrastructure Guidelines* (2019) emphasizes the necessity of step-free paths, maximum 6% ramp inclinations, tactile paving guidance, and multi-modal sensory accommodation.
 - **OpenStreetMap (OSM) Accessibility Attributes:** Graph edges model standardized properties (`incline`, `surface`, `tactile_paving`, `kerb`, `wheelchair`, `lit`, `indoor`).
-- **W3C WCAG 2.2 Level AA:** UI interfaces comply with strict contrast thresholds, 44×44px interactive touch targets, visible focus indicators, and accessible dialog focus traps.
+- **W3C WCAG 2.2 Level AA Evaluation:** Automated Axe scans detected zero violations in the five tested application states; keyboard focus, touch targets, and responsive overflow are additionally covered by Playwright assertions.
 
 ---
 
@@ -41,7 +41,7 @@ The signature journey evaluates wayfinding between **Library Entrance** (`node_l
 
 ## 4. Benchmark Scenarios Suite (Synthetic Demo Campus)
 
-AccessGraph evaluates campus equity against 8 benchmark routes representing diverse daily transit patterns across a synthetic campus fixture (`docs/evaluation-results.json`):
+AccessGraph evaluates campus equity against 8 deterministic synthetic benchmark routes representing diverse daily transit patterns across a synthetic campus fixture (`docs/evaluation-results.json`):
 
 | Scenario ID | Origin $\rightarrow$ Destination | Profile Preset | Fastest Base | Accessible Time | Penalty Ratio | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -57,9 +57,9 @@ AccessGraph evaluates campus equity against 8 benchmark routes representing dive
 ### Summary Statistics
 - **Total Scenarios Evaluated:** 8
 - **Disconnected Routes:** 0 (all benchmark routes have feasible paths under default synthetic fixture)
-- **Baseline Access Penalty (No Outages):** **1.165×** (~1.17× across all 8 benchmark routes)
+- **Baseline Access Penalty (No Outages):** **1.165×** (~1.17× across all 8 deterministic synthetic benchmark routes)
 - **Active Outages in Default Fixture:** 2 (`barrier_lift_outage`, `barrier_dining_repair`)
-- **Active Access Penalty:** **1.223×** (~1.22× across all 8 benchmark routes; verified strict monotonic increase $1.223 > 1.165$)
+- **Active Access Penalty:** **1.223×** (~1.22× across all 8 deterministic synthetic benchmark routes; verified strict monotonic increase $1.223 > 1.165$)
 - **Top Repair Candidate:** `barrier_lift_outage` (Rank 1, +2.9 min recovered for Step-Free profile)
 
 ---
@@ -98,11 +98,11 @@ Metrics measured via committed benchmark harness (`scripts/run-benchmarks.ts`), 
 Evaluated across 5 viewport projects (Mobile Small 320px, Mobile Standard 390px, Tablet 768px, Desktop HD 1280px, Desktop Large 1920px):
 - **Distinct Test Definitions:** 9 distinct E2E specifications
 - **Total Executions:** 45 browser test runs
-- **WCAG 2.1 & 2.2 Level AA Violations:** **0 violations** across all 5 interaction states (Default Planner, Step-free, Strict No-Route, Modal Focus Traps, Access Debt Dashboard).
+- **Automated Accessibility Testing:** Automated Axe scans detected zero violations in the five tested application states; keyboard focus, touch targets, and responsive overflow are additionally covered by Playwright assertions.
 - **Contrast Ratios:** All body text $\ge 5.5:1$ (exceeding WCAG 4.5:1 threshold).
 - **Interactive Targets:** All buttons maintain minimum $44 \times 44\text{ px}$ target boundaries.
 - **Focus Management:** Full dialog Tab/Shift+Tab cycle, Escape close, and opener focus restoration verified.
-- **Service Worker:** Offline navigation and client-side asset serving verified under simulated network disconnection.
+- **Service Worker:** The installed Service Worker passed automated offline reload testing after an initial online load.
 
 ### 6.3 Security Audit (`scripts/security-scan.cjs` & `npm audit`)
 - **Git Commit History:** Scanned full history. **0 secrets found.**

@@ -49,7 +49,7 @@ Furthermore, university facilities management and accessibility offices operate 
 |              v                                               v                |
 |  +-------------------------+                   +---------------------------+  |
 |  | Single-Trip Itinerary   |                   | Access Debt Diagnostic    |  |
-|  | & Deterministic Proof   |                   | (8 Benchmark Scenarios)   |  |
+|  | & Deterministic Proof   |                   | (8 Synthetic Scenarios)   |  |
 |  +-------------------------+                   +-------------+-------------+  |
 |                                                              |                |
 |                                                              v                |
@@ -110,7 +110,7 @@ This guarantees mathematical determinism across all browser runtimes, operating 
 ## 3. Access Debt Formulation (`src/domain/accessDebt.ts`)
 
 ### 3.1 Network Penalty Ratio
-For each campus benchmark scenario $s \in S$, we evaluate the optimal unconstrained travel time $T_{\text{fastest}}(s)$ against the profile-compliant accessible travel time $T_{\text{accessible}}(s)$:
+For each deterministic synthetic benchmark scenario $s \in S$, we evaluate the optimal unconstrained travel time $T_{\text{fastest}}(s)$ against the profile-compliant accessible travel time $T_{\text{accessible}}(s)$:
 
 $$\text{AccessPenalty}(s) = \frac{T_{\text{accessible}}(s)}{T_{\text{fastest}}(s)} \quad (\text{for connected accessible routes})$$
 
@@ -140,7 +140,7 @@ Deterministic candidate ranking prioritizes:
 1. **Zero Cloud Dependencies:** The entire graph database, routing engine, and audit suite execute within the local V8/JavaScript runtime.
 2. **Zero Telemetry or Analytics:** No Google Analytics, no telemetry beacons, no external API calls.
 3. **No Fingerprinting:** LocalStorage stores only local incident barrier states and user profile preference chips.
-4. **Offline Capability:** A standard Service Worker caches application assets (`index.html`, CSS, JavaScript bundle, WebP assets). The application functions with 100% feature parity during internet outages.
+4. **Offline Capability:** A standard Service Worker caches application assets (`index.html`, CSS, JavaScript bundle, WebP assets). The installed Service Worker passed automated offline reload testing after an initial online load.
 
 ---
 
@@ -151,6 +151,6 @@ Deterministic candidate ranking prioritizes:
 | **Framework** | React 18 + TypeScript | Strict static typing for domain safety |
 | **Bundler** | Vite 5 | Sub-second HMR, optimized manual chunk splitting |
 | **Icons** | Lucide React | Lightweight SVG symbols without external webfonts |
-| **Unit Testing** | Vitest 2.1 + v8 coverage | 95.8% statement coverage, 100% function coverage |
-| **E2E & Accessibility** | Playwright + `@axe-core/playwright` | Zero WCAG 2.2 AA violations across 5 viewports |
+| **Unit Testing** | Vitest 2.1 + v8 coverage | 36/36 passed, 94.07% statement coverage, 89.4% branch coverage, 100% function coverage |
+| **E2E & Accessibility** | Playwright + `@axe-core/playwright` | 45/45 executions passed across 5 viewports; 0 Axe violations across 5 tested states |
 | **Security Scanning** | Custom Git + Working Tree Scanner | Full commit history scanned for secret leaks |

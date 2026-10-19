@@ -34,7 +34,7 @@ export const AccessDebtDashboard: React.FC<AccessDebtDashboardProps> = ({
             </span>
           </div>
           <div className="stat-value font-mono">{report.totalScenariosEvaluated}</div>
-          <div className="stat-subtext">Weight-calibrated benchmark routes</div>
+          <div className="stat-subtext">8 deterministic synthetic benchmark routes</div>
         </div>
 
         <div className={`stat-card ${report.disconnectedScenariosCount > 0 ? "card-warning" : ""}`}>

@@ -66,7 +66,7 @@ All screenshots below are authentic captures from our automated Playwright visua
 ---
 
 ### 3. The Access Debt Diagnostic Dashboard & Prioritized Repairs
-*The institutional view audits 8 documented synthetic benchmark scenarios. The counterfactual repair simulator identifies that resolving the Science Complex Lift Outage recovers 2.9 minutes per student transit trip, ranking it as the #1 capital intervention. Clicking **"Simulate Fix"** immediately tests the resolution live.*
+*The institutional view audits 8 deterministic synthetic benchmark scenarios. The counterfactual repair simulator identifies that resolving the Science Complex Lift Outage recovers 2.9 minutes per student transit trip, ranking it as the #1 capital intervention. Clicking **"Simulate Fix"** immediately tests the resolution live.*
 
 <div align="center">
   <img src="./docs/assets/screenshots/03-access-debt-dashboard.png" alt="AccessGraph Access Debt Diagnostic Dashboard with Ranked Repairs" width="100%" />
@@ -113,7 +113,7 @@ The lift is hypothetically repaired: average transit debt falls and time is reco
                    ↓
 [6. Offline Resilience Verified]
 User toggles browser offline.
-Service Worker serves application from local cache with 100% routing feature parity.
+The installed Service Worker passed automated offline reload testing after an initial online load, maintaining local routing execution.
 ```
 
 ---
@@ -234,9 +234,9 @@ npm run audit
 | :--- | :--- | :--- | :--- |
 | **Type Safety** | `tsc --noEmit` | 0 TypeScript errors | **PASS** (0 errors) |
 | **Code Quality** | `eslint` | 0 ESLint errors/warnings | **PASS** (0 warnings) |
-| **Unit Test Suite** | Vitest v8 | $\ge 85\%$ lines, $\ge 80\%$ branches | **PASS** (94.07% stmts, 36/36 tests) |
+| **Unit Test Suite** | Vitest v8 | $\ge 85\%$ lines, $\ge 80\%$ branches | **PASS** (94.07% stmts, 89.4% branches, 36/36 tests) |
 | **E2E Viewports** | Playwright | 320px, 390px, 768px, 1280px, 1920px | **PASS** (45/45 executions) |
-| **Accessibility Audit** | `@axe-core/playwright` | WCAG 2.1 AA & WCAG 2.2 AA (5 states) | **PASS** (0 violations) |
+| **Accessibility Audit** | `@axe-core/playwright` | WCAG 2.1 AA & WCAG 2.2 AA (5 states) | **PASS** (0 violations across 5 states; focus, touch targets & overflow tested) |
 | **Performance Benchmarks** | `scripts/run-benchmarks.ts` | 1,000 Dijkstra runs + 200 audits | **PASS** (0.022ms Dijkstra, 0.561ms audit) |
 | **Evidence & Metric Check** | `scripts/check-evidence.ts` | Monotonicity + JSON artifact sync | **PASS** (1.165x $\rightarrow$ 1.223x debt) |
 | **Secret Scanning** | `scripts/security-scan.cjs` | Full Git history + working tree | **PASS** (0 secrets found) |
