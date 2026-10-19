@@ -36,9 +36,9 @@
 
 ## 2. Pending External Assets & Actions
 
-- [ ] **Record Product Demo Video:** Record real walkthrough of under 4 minutes following `docs/DEMO_SCRIPT.md`.
-- [ ] **Upload Public Demo Video:** Upload video to YouTube/Vimeo and replace placeholder:
-  - Video URL: `PUBLIC_DEMO_VIDEO_URL_REQUIRED`
+- [x] **Record Product Demo Video:** 3:29 real product walkthrough recorded following `docs/DEMO_SCRIPT.md`.
+- [x] **Upload Unlisted Demo Video:** Uploaded to YouTube; HD processing and copyright checks completed successfully:
+  - Video URL: https://youtu.be/LwGtuFbr2i4
 - [ ] **Join Official Hackathon Discord:** Join EurekaDev 2026 participant server and register handle.
 - [ ] **Devpost Form Completion:** Populate all Devpost submission fields using `docs/DEVPOST_SUBMISSION.md`.
   - Track: Coding Track — Problem in the Community

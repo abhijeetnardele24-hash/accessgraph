@@ -261,7 +261,8 @@ npm run audit
 - [**Empirical Evaluation (`docs/EVALUATION.md`)**](./docs/EVALUATION.md): Benchmark scenario results and performance benchmarks.
 - [**Privacy & Limitations (`docs/PRIVACY_AND_LIMITATIONS.md`)**](./docs/PRIVACY_AND_LIMITATIONS.md): Client-side privacy guarantees and disclosures.
 - [**Devpost Submission (`docs/DEVPOST_SUBMISSION.md`)**](./docs/DEVPOST_SUBMISSION.md): Complete copy-paste submission writeup.
-- [**3:20 Video Script (`docs/DEMO_SCRIPT.md`)**](./docs/DEMO_SCRIPT.md): Timed word-for-word recording guide for the demonstration video.
+- [**3:29 Demo Video**](https://youtu.be/LwGtuFbr2i4): End-to-end product walkthrough covering constrained routing, Access Debt repair simulation, offline reload behavior, and verified engineering evidence.
+- [**Video Script (`docs/DEMO_SCRIPT.md`)**](./docs/DEMO_SCRIPT.md): Timed narration and recording guide used for the final demonstration video.
 - [**Submission Checklist (`docs/SUBMISSION_CHECKLIST.md`)**](./docs/SUBMISSION_CHECKLIST.md): Final submission readiness verification.
 - [**Build Work Log (`docs/BUILD_LOG.md`)**](./docs/BUILD_LOG.md): Chronological development milestones.
 

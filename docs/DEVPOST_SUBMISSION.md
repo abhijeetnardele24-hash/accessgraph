@@ -89,5 +89,5 @@ We learned that campus accessibility is not merely a signage or routing challeng
 ## 🔗 Links & Resources
 - **GitHub Repository:** [https://github.com/abhijeetnardele24-hash/accessgraph](https://github.com/abhijeetnardele24-hash/accessgraph)
 - **Live Demo / Deployment:** [https://abhijeetnardele24-hash.github.io/accessgraph/](https://abhijeetnardele24-hash.github.io/accessgraph/)
-- **Demo Video:** `PUBLIC_DEMO_VIDEO_URL_REQUIRED` *(Pending recording under 4 minutes)*
+- **Demo Video:** https://youtu.be/LwGtuFbr2i4 *(3:29, unlisted YouTube walkthrough; HD processing and copyright checks complete)*
 - **License:** MIT License
