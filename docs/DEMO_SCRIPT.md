@@ -9,7 +9,7 @@
 ### [0:00 - 0:35] The Problem: Why Traditional Navigation Fails Disabled Students
 - **Visual:** Screen opens on AccessGraph landing page. Crisp, clean UI displaying the Synthetic Demo Campus map.
 - **Narrator (Voiceover):**  
-  *"Students with physical disabilities, mobility aids, temporary injuries, or sensory sensitivities frequently encounter hidden campus barriers. But standard navigation apps are built on an unconstrained assumption: they optimize strictly for Euclidean walking distance. A route that looks 30 seconds faster on paper can guide a wheelchair user directly into a flight of stairs, or leave a student stranded in front of a broken elevator with no alternative path.*  
+  *"Students with physical disabilities, mobility aids, temporary injuries, or sensory sensitivities frequently encounter hidden campus barriers. General-purpose navigation may prioritize distance and walking time without modeling every mobility constraint. A route that looks faster can still include stairs or rely on a lift that is out of service.*
   *Meanwhile, university facilities managers operate with limited capital budgets. This is AccessGraph: constraint-aware campus wayfinding that transforms daily detour burdens into actionable infrastructure repair priorities."*
 
 ---
@@ -21,7 +21,7 @@
   *Now watch what happens when we switch to the 'Step-Free' profile.*  
   *(Click 'Step-Free' chip)*  
   *Instantly, the hard constraint filter rejects the stairs. But notice our active incident banner: the Science Complex passenger elevator is undergoing a traction motor overhaul.*  
-  *Rather than failing or showing an impassable dead end, AccessGraph deterministically reroutes the student through the central courtyard and across the covered elevated ramp—guaranteeing continuous, step-free access."*
+  *For this synthetic campus fixture, AccessGraph finds a valid alternative through the central courtyard and across the covered elevated ramp, keeping the demonstrated route step-free."*
 
 ---
 
@@ -37,27 +37,27 @@
 - **Visual:** Click "Access Debt Diagnostic" in the header navigation. The dashboard cards and repair table appear.
 - **Narrator (Voiceover):**  
   *"Now let's switch to the institutional view: The Access Debt Dashboard.*  
-  *Access Debt is our proprietary equity metric. Across 8 benchmark campus scenarios, we calculate the ratio of accessible transit time to fastest unconstrained travel time.*  
+  *Access Debt is the equity metric we defined for this prototype. Across 8 deterministic synthetic benchmark scenarios, we calculate the ratio of accessible transit time to fastest unconstrained travel time.*
   *Under current conditions, campus travelers face an average 1.22x access penalty—an extra 22% transit burden simply to reach classes.*  
   *Below, our counterfactual simulation engine tests the resolution of every reported barrier on campus and ranks them by immediate ROI.*  
-  *Ranked #1 is the Science Complex Lift Outage. Repairing this single elevator recovers 2.9 minutes per transit trip and reconnects isolated second-floor labs.*  
+  *Ranked #1 is the Science Complex Lift Outage. In this fixture, resolving it recovers 2.9 minutes on the affected benchmark trip and reduces the step-free detour burden.*
   *When facilities managers click 'Simulate Fix'...*  
   *(Click 'Simulate Fix' button)*  
-  *...the elevator outage is instantly resolved, campus travel debt drops, and connectivity is restored across the entire university."*
+  *...the simulation removes that synthetic outage and recalculates the campus benchmark so facilities teams can compare the projected impact before prioritizing work."*
 
 ---
 
-### [2:30 - 2:55] 100% Client-Side Privacy & Offline Capability
+### [2:30 - 2:55] Local Computation & Tested Offline Reload
 - **Visual:** Disconnect Wi-Fi (toggle offline mode in devtools) and refresh the page. The application reloads instantly and functions seamlessly.
 - **Narrator (Voiceover):**  
-  *"Accessibility data is deeply personal. AccessGraph is engineered with zero telemetry, zero analytics, zero external API calls, and zero third-party trackers. All graph algorithms execute locally in your browser in under a millisecond.*  
-  *Thanks to our Service Worker architecture, the entire application is offline-ready. If a storm cuts campus Wi-Fi, students can still navigate safely and access essential detour paths without an internet connection."*
+  *"Accessibility preferences can be sensitive. AccessGraph keeps routing and Access Debt calculations in the browser and includes no application telemetry or third-party tracking scripts. On the test host, the committed benchmark measured sub-millisecond median calculations.*
+  *After one online load installs the Service Worker, our automated browser test disconnects the network, reloads the app, and verifies that the cached interface and local routing journey still work offline."*
 
 ---
 
 ### [2:55 - 3:20] Verification & Closing
 - **Visual:** Show terminal running test suite (36 unit tests passing, 45 Playwright test executions across 5 viewports passing, 0 Axe violations).
 - **Narrator (Voiceover):**  
-  *"AccessGraph isn't a concept mockup—it is fully audited engineering. Our automated test suite includes 36 Vitest unit tests with over 94% statement coverage, 45 Playwright browser test executions across five responsive viewports, and zero automated WCAG 2.2 Level AA violations.*  
+  *"AccessGraph is a working hackathon prototype with reproducible automated evidence. The suite includes 36 Vitest unit and component tests with over 94% statement coverage and 45 Playwright executions across five responsive viewports. Axe detected zero violations in the five tested interaction states.*
   *By uniting daily student wayfinding with systemic infrastructure auditing, AccessGraph ensures that accessibility is no longer an afterthought—it's a measurable, solvable priority.*  
   *Thank you."*

@@ -9,7 +9,7 @@
 
 ## 🎯 Pitch & Inspiration
 
-For students and campus visitors with physical disabilities, mobility impairments, temporary injuries, low vision, or sensory sensitivities, conventional navigation tools are fundamentally broken. Mainstream mapping apps optimize strictly for able-bodied walking speed or Euclidean distance—leading wheelchair users directly into flight-of-stairs dead ends, forcing students with visual impairments onto unguided pathways, or stranding travelers in front of out-of-service elevators with zero alternative recourse. The *World Health Organization (WHO) World Report on Disability* (2011) and *UNICEF Accessible Infrastructure Guidelines* (2019) both identify physical infrastructure bottlenecks and lack of real-time accessibility data as severe institutional barriers to higher education.
+For students and campus visitors with physical disabilities, temporary injuries, low vision, or sensory sensitivities, a route optimized only for distance or walking time may still be unusable. Missing accessibility attributes can lead a wheelchair user toward stairs, expose a low-vision traveler to an unguided path, or depend on a lift that is out of service. The *World Health Organization (WHO) World Report on Disability* (2011) and *UNICEF Accessible Infrastructure Guidelines* (2019) discuss physical infrastructure and information barriers affecting participation.
 
 At the same time, university facilities management teams operate with constrained annual maintenance budgets. Without quantitative network data showing which physical bottlenecks cause the greatest collective disruption across daily student journeys, repair scheduling risks becoming reactive rather than systemically optimized.
 
@@ -38,7 +38,7 @@ AccessGraph functions as a dual-engine progressive web application:
   2. Cumulative travel minutes saved across all benchmark scenarios ($\text{MinutesRecovered}$ descending);
   3. Profiles helped count;
   4. Deterministic barrier ID tie-breaker.
-- **Interactive Simulation:** Facilities managers can click **"Simulate Fix"** to immediately preview how a repair restores campus connectivity in real-time.
+- **Interactive Simulation:** Facilities managers can click **"Simulate Fix"** to preview how a hypothetical repair changes routes and the synthetic campus benchmark.
 
 ---
 
@@ -50,24 +50,24 @@ AccessGraph functions as a dual-engine progressive web application:
 - **Offline & Persistence:** Service Worker implementation (`sw.js`) with cache-first navigation fallback and local browser storage (`localStorage`) for custom profiles and simulated barriers.
 - **Testing & Quality Assurance:**
   - **Vitest v8:** 36 unit and component tests achieving **94.07% statement coverage**, **89.40% branch coverage**, and **100% function coverage**.
-  - **Playwright & `@axe-core/playwright`:** 9 distinct end-to-end test suites across 5 viewports (320px to 1920px, 45 total executions), asserting **0 WCAG 2.2 AA violations** across all 5 interaction states.
+  - **Playwright & `@axe-core/playwright`:** 9 distinct end-to-end definitions across 5 viewports (320px to 1920px, 45 total executions); Axe detected **0 violations** across 5 tested interaction states. Keyboard focus, touch targets, and overflow have additional assertions.
   - **Security Scanner:** Custom streaming scanner verifying full Git commit history and production dist bundles for zero credential leaks.
-  - **Benchmark Harness:** Committed reproducible benchmark script (`scripts/run-benchmarks.ts`) measuring 0.022ms median single-route Dijkstra latency and 0.561ms median 8-scenario Access Debt audit latency.
+  - **Benchmark Harness:** Committed reproducible benchmark script (`scripts/run-benchmarks.ts`); the recorded test-host run measured 0.020ms median single-route latency and 0.555ms median 8-scenario Access Debt audit latency. Timing varies by host.
 
 ---
 
 ## 🧗 Challenges We Ran Into
 
 1. **Multi-Story Elevation Transitions:** Modeling vertical movement (stairs vs. hydraulic elevators vs. exterior ramp bridges) within a 2D schematic graph required careful node height calibration and directional edge logic to prevent invalid elevator skips.
-2. **Deterministic Route Selection:** Standard priority queues often suffer from arbitrary tie-breaking when two detours share identical durations or when graph edge lists are shuffled. Implementing our 4-key lexicographical comparison (including deterministic path key comparison) guaranteed mathematical determinism across all browser environments.
-3. **Automated WCAG 2.2 AA Compliance:** Meeting strict Level AA standards required meticulous attention to color contrast (achieving $\ge 5.5:1$ on all interactive states), keyboard focus trapping in dialogs (wrapping Tab and Shift+Tab, Escape key dismiss, opener focus restoration), and accessible landmark navigation.
+2. **Deterministic Route Selection:** Equal-cost routes can flip when graph edge lists are shuffled. Our explicit lexicographical comparison, including a deterministic path key, produces stable output in repeated and randomized-edge-order tests.
+3. **Automated Accessibility Coverage:** We added high-contrast tokens, dialog focus trapping, Escape dismissal, opener focus restoration, landmark navigation, minimum touch-target checks, and Axe scans. Axe detected no violations in the five tested states; this is automated evidence, not a claim of complete manual accessibility certification.
 
 ---
 
 ## 🏆 Accomplishments We're Proud Of
 
 - **Under 75-Second Deterministic Proof:** Demonstrating in under 75 seconds how an elevator outage immediately forces a deterministic reroute via a covered ramp bridge, and how the Access Debt dashboard flags that exact elevator as the #1 repair priority.
-- **100% Client-Side Privacy:** Zero server telemetry, zero third-party trackers, zero cookies. All computations execute locally in sub-millisecond time.
+- **Local-First Privacy Boundary:** Routing and Access Debt calculations execute in the browser with no application telemetry or third-party tracking scripts. The committed benchmark measured sub-millisecond median calculation time on the test host; performance varies by device.
 - **Comprehensive Quality Gates:** 36 Vitest tests and 45 Playwright E2E browser executions with 0 Axe violations.
 
 ---

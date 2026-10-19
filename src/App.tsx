@@ -223,8 +223,8 @@ export const App: React.FC = () => {
           <div className="footer-col">
             <span className="footer-title">Privacy &amp; Architecture</span>
             <p className="footer-text">
-              <strong>100% Client-Side.</strong> Zero server telemetry, zero third-party cookies, zero tracking scripts.
-              Route computation executes entirely within your browser in &lt;1ms.
+              <strong>Local client-side computation.</strong> No application telemetry or third-party tracking scripts.
+              The committed test-host benchmark records sub-millisecond median route calculation; device performance varies.
             </p>
           </div>
 

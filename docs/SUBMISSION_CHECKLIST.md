@@ -17,12 +17,12 @@
 - [x] **Custom Profile Editor:** Modal controls hard constraints (slope %, width, stairs, lifts, uneven surfaces) and soft weights with local storage persistence and active UI indicator.
 - [x] **Dialog Accessibility & Focus Trapping:** Add Barrier and Custom Profile dialogs strictly cycle focus via Tab and Shift+Tab, close on Escape, and restore focus to opener.
 - [x] **Deterministic E2E Verification:** 9 distinct test definitions across 5 viewports (45 total executions) verified via Playwright (`tests/e2e/accessibility.spec.ts`) with 100% pass rate.
-- [x] **Automated Accessibility Compliance:** Automated `@axe-core/playwright` audit asserts **0 WCAG 2.1 AA / 2.2 AA violations** across all 5 interaction states (Default Planner, Step-free, Strict No-Route, Modal Focus Traps, Access Debt Dashboard).
-- [x] **Reproducible Benchmarks & Metric Synchronization:** `npm run benchmark` and `npm run evidence:check` verify 0.022ms Dijkstra median, 0.561ms audit median, baseline 1.165×, and active 1.223× debt.
+- [x] **Automated Accessibility Coverage:** `@axe-core/playwright` detected **0 violations** across 5 tested interaction states (Default Planner, Step-free, Strict No-Route, Modal Focus Traps, Access Debt Dashboard). Keyboard focus, touch targets, and responsive overflow have separate Playwright assertions; no manual screen-reader certification is claimed.
+- [x] **Reproducible Benchmarks & Metric Synchronization:** The latest committed `npm run benchmark` artifact records 0.020ms Dijkstra median and 0.555ms audit median on the test host; `npm run evidence:check` independently verifies baseline 1.165× and active 1.223× debt. Timing varies by host.
 - [x] **Service Worker Offline Caching:** Real Service Worker navigation and asset serving verified offline under simulated network disconnection (reloads and operates offline after first online load).
 - [x] **Security & Secret Scanner:** `npm run security-scan` scans full Git commit history, working tree, and `dist/` bundle: **0 secrets found**.
 - [x] **Dependency Security Audit:** `npm run audit` (`npm audit --omit=dev --audit-level=high`) reports **0 high/critical vulnerabilities**.
-- [x] **Production Bundle Optimization:** `npm run build` completes cleanly, chunked into vendor, icons, and core bundle (total gzip ~63 KB).
+- [x] **Production Bundle Optimization:** `npm run build` completes cleanly, chunked into vendor, icons, core, CSS, and HTML assets (total gzip ~74.8 KB in the verified build).
 - [x] **Authentic High-Resolution Screenshots:**
   - `docs/assets/screenshots/01-wayfinding-planner.png` (Desktop 1440x900 3-column layout with optimal fastest route).
   - `docs/assets/screenshots/02-step-free-reroute.png` (Step-free reroute via covered ramp with deterministic proof callout).

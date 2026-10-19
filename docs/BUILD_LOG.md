@@ -86,7 +86,7 @@
   - Verified local storage reload persistence (`page.reload()`) for customized mobility profiles.
   - Added mobile touch target boundary assertions ($\ge 44\text{px}$) and validated zero horizontal overflow on mobile viewports.
 - **Reproducible Performance Benchmarks & Evidence Harness:**
-  - Added `npm run benchmark` (`scripts/run-benchmarks.ts`) executing 1,000 Dijkstra iterations (0.022ms median) and 200 Access Debt audit iterations (0.561ms median).
+  - Added `npm run benchmark` (`scripts/run-benchmarks.ts`) executing 1,000 Dijkstra iterations and 200 Access Debt audit iterations. The latest committed test-host artifact records 0.020ms and 0.555ms medians respectively; timing varies by host.
   - Authored automated integrity checker `npm run evidence:check` (`scripts/check-evidence.ts`) verifying baseline debt (1.165×), active debt (1.223×), strict monotonic increase ($1.223 > 1.165$), metric JSON parity, and screenshot non-emptiness.
   - Integrated benchmark execution and evidence check directly into GitHub Actions CI workflow.
 - **Recomposed Authentic Screenshots:**

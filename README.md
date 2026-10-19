@@ -5,7 +5,7 @@
 **Constraint-aware campus navigation that turns inaccessible routes into actionable repair priorities.**
 
 [![CI Quality Gate](https://github.com/abhijeetnardele24-hash/accessgraph/actions/workflows/ci.yml/badge.svg)](https://github.com/abhijeetnardele24-hash/accessgraph/actions/workflows/ci.yml)
-[![Accessibility: WCAG 2.2 AA](https://img.shields.io/badge/Accessibility-WCAG%202.2%20AA%20Audited-164E35.svg)](https://github.com/abhijeetnardele24-hash/accessgraph)
+[![Accessibility: automated Axe audit](https://img.shields.io/badge/Accessibility-Axe%20audit%20%7C%205%20states-164E35.svg)](https://github.com/abhijeetnardele24-hash/accessgraph)
 [![Unit Coverage: 94.07%](https://img.shields.io/badge/Coverage-94.07%25%20Statements-1B6494.svg)](https://github.com/abhijeetnardele24-hash/accessgraph)
 [![Playwright E2E: 45/45 Passed](https://img.shields.io/badge/Playwright-45%2F45%20Executions%20Passed-164E35.svg)](https://github.com/abhijeetnardele24-hash/accessgraph)
 [![Offline: PWA Ready](https://img.shields.io/badge/Offline-PWA%20Service%20Worker-B45309.svg)](https://github.com/abhijeetnardele24-hash/accessgraph)
@@ -23,7 +23,7 @@
 
 ## 💡 The Core Problem: The Institutional Accessibility Paradox
 
-Standard digital navigation tools optimize strictly for unconstrained Euclidean distance and walking speed. For individuals with mobility constraints, wheelchair users, students with low vision, sensory sensitivities, or temporary injuries, this one-dimensional optimization leads directly to physical impasses: flight-of-stairs dead ends, excessive slope fatigue, and unannounced out-of-service elevators (issues highlighted globally in the *WHO World Report on Disability*, 2011, and *UNICEF Accessible Infrastructure Guidelines*, 2019).
+Many general-purpose navigation tools prioritize distance and walking time without modeling every user's mobility constraints. For wheelchair users, students with low vision, people with sensory sensitivities, or anyone with a temporary injury, missing accessibility attributes can produce unusable routes: stairs, excessive slopes, or reliance on an out-of-service lift (barriers discussed in the *WHO World Report on Disability*, 2011, and *UNICEF Accessible Infrastructure Guidelines*, 2019).
 
 At the same time, university facilities management operates with constrained maintenance budgets. When institutions lack quantitative network data on which physical bottlenecks cause the greatest collective disruption across daily student journeys, repair scheduling risks becoming reactive rather than systemically optimized.
 
@@ -166,7 +166,7 @@ Disconnected routes are tracked separately in `disconnectedCount` without arbitr
 | **Persistence** | Browser `localStorage` | Private local incident logs and user profile preferences |
 | **Offline Architecture** | Service Worker (`public/sw.js`) | Offline navigation fallback and asset caching |
 | **Unit Testing** | Vitest 2.1 + v8 coverage | 36 unit/component tests, 94.07% statement coverage |
-| **E2E & Accessibility** | Playwright + `@axe-core/playwright` | 9 distinct test specs across 5 viewports (45 total executions), 0 WCAG 2.2 AA violations |
+| **E2E & Accessibility** | Playwright + `@axe-core/playwright` | 9 distinct test specs across 5 viewports (45 total executions); Axe found 0 violations in 5 tested states |
 | **Security Auditing** | Custom Node.js Security Scanner | Full Git history streaming scan for secret leaks |
 
 ---
@@ -236,12 +236,12 @@ npm run audit
 | **Code Quality** | `eslint` | 0 ESLint errors/warnings | **PASS** (0 warnings) |
 | **Unit Test Suite** | Vitest v8 | $\ge 85\%$ lines, $\ge 80\%$ branches | **PASS** (94.07% stmts, 89.4% branches, 36/36 tests) |
 | **E2E Viewports** | Playwright | 320px, 390px, 768px, 1280px, 1920px | **PASS** (45/45 executions) |
-| **Accessibility Audit** | `@axe-core/playwright` | WCAG 2.1 AA & WCAG 2.2 AA (5 states) | **PASS** (0 violations across 5 states; focus, touch targets & overflow tested) |
-| **Performance Benchmarks** | `scripts/run-benchmarks.ts` | 1,000 Dijkstra runs + 200 audits | **PASS** (0.022ms Dijkstra, 0.561ms audit) |
+| **Accessibility Audit** | `@axe-core/playwright` | Automated Axe rules across 5 states | **PASS** (0 detected violations; focus, touch targets & overflow additionally tested) |
+| **Performance Benchmarks** | `scripts/run-benchmarks.ts` | 1,000 Dijkstra runs + 200 audits | **PASS** (0.020ms Dijkstra median, 0.555ms audit median on the recorded test host) |
 | **Evidence & Metric Check** | `scripts/check-evidence.ts` | Monotonicity + JSON artifact sync | **PASS** (1.165x $\rightarrow$ 1.223x debt) |
 | **Secret Scanning** | `scripts/security-scan.cjs` | Full Git history + working tree | **PASS** (0 secrets found) |
 | **Dependency Audit** | `npm audit` | 0 high/critical vulnerabilities | **PASS** (0 vulnerabilities) |
-| **Bundle Size** | Vite Manual Chunks | Minimal footprint (<250KB gzip) | **PASS** (~63KB gzip total) |
+| **Bundle Size** | Vite Manual Chunks | Minimal footprint (<250KB gzip) | **PASS** (~74.8KB gzip total, including HTML/CSS/JS) |
 
 ---
 

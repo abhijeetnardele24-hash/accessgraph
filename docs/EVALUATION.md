@@ -12,7 +12,7 @@
 AccessGraph was evaluated against three rigorous criteria:
 1. **Mathematical Determinism & Constraint Adherence:** Verifying that route calculation strictly honors hard safety limits (zero stairs on step-free, maximum slope thresholds, clear path width, barrier evaluation time windows) and generates identical paths across repeated invocations and randomized edge ordering.
 2. **Access Debt Efficacy:** Demonstrating that the system correctly pinpoints high-impact physical bottlenecks and ranks capital repair candidates to maximize network-wide accessibility and travel time recovery.
-3. **Execution Performance & Robustness:** Providing client-side calculation (median single-route latency of 0.022ms; median 8-scenario audit latency of 0.561ms). The installed Service Worker passed automated offline reload testing after an initial online load.
+3. **Execution Performance & Robustness:** Providing client-side calculation (recorded test-host median single-route latency of 0.020ms; median 8-scenario audit latency of 0.555ms). The installed Service Worker passed automated offline reload testing after an initial online load. Timing varies by host.
 
 ---
 
@@ -70,8 +70,10 @@ Metrics measured via committed benchmark harness (`scripts/run-benchmarks.ts`), 
 
 | Benchmark Operation | Sample Size | Mean Latency | Median Latency | p95 Latency | Memory & Network |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Single-trip `findRoute` (Dijkstra + soft scoring) | 1,000 iterations | **0.027 ms** | **0.022 ms** | **0.044 ms** | 100% Client-Side, 0 Network requests |
-| Complete `evaluateAccessDebt` (8 scenarios + ranking) | 200 iterations | **0.608 ms** | **0.561 ms** | **0.897 ms** | 100% Client-Side, 0 Network requests |
+| Single-trip `findRoute` (Dijkstra + soft scoring) | 1,000 iterations | **0.026 ms** | **0.020 ms** | **0.042 ms** | Local calculation, 0 network requests |
+| Complete `evaluateAccessDebt` (8 scenarios + ranking) | 200 iterations | **0.591 ms** | **0.555 ms** | **0.848 ms** | Local calculation, 0 network requests |
+
+These measurements are the values recorded in `docs/benchmark-metrics.json` on the documented Windows/Node test host; they are reproducible as a procedure, not guaranteed identical across hardware or runtime load.
 
 *Environment: Node.js v24.11.1, Windows x64, 13th Gen Intel Core i5-13420H.*
 

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-19T13:30:50.202Z",
+  "timestamp": "2026-10-19T15:07:00.864Z",
   "environment": {
     "nodeVersion": "v24.11.1",
     "platform": "win32",
@@ -10,17 +10,17 @@
   "singleTripRouting": {
     "operation": "findRoute (Dijkstra + Multi-Objective Soft Scoring)",
     "iterations": 1000,
-    "meanMs": 0.028,
+    "meanMs": 0.026,
     "medianMs": 0.02,
-    "p95Ms": 0.061,
+    "p95Ms": 0.042,
     "unit": "milliseconds"
   },
   "accessDebtAudit": {
     "operation": "evaluateAccessDebt (8 benchmark scenarios + repair ranking simulations)",
     "iterations": 200,
-    "meanMs": 0.582,
-    "medianMs": 0.535,
-    "p95Ms": 0.889,
+    "meanMs": 0.591,
+    "medianMs": 0.555,
+    "p95Ms": 0.848,
     "unit": "milliseconds"
   }
 }

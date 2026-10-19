@@ -2,8 +2,8 @@
 
 > **Specification & Engineering Documentation**  
 > **Track:** EurekaDev 2026 — Coding Track / Problem in the Community  
-> **Status:** Production / Judge-Ready  
-> **Compliance:** WCAG 2.2 AA Audited • 100% Client-Side Private • Zero External Telemetry
+> **Status:** Hackathon Prototype / Judge-Ready
+> **Verification:** Automated Axe audit across 5 states • Local client-side computation • No application telemetry
 
 ---
 
@@ -103,7 +103,7 @@ $$\text{Key}(u) = \langle C(u), \; T_{\text{sec}}(u), \; D_{\text{meters}}(u), \
 3. Tertiary: Shortest physical distance $D_{\text{meters}}(u)$.
 4. Quaternary: Lexicographical deterministic path key `pathKey` string comparison.
 
-This guarantees mathematical determinism across all browser runtimes, operating systems, and edge insertion sequences.
+The implementation uses explicit deterministic tie-breakers, and automated tests verify identical outputs across repeated runs and randomized edge insertion sequences.
 
 ---
 
