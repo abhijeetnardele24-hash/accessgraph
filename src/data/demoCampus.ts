@@ -341,7 +341,7 @@ export const DEMO_CAMPUS: CampusDataset = {
       distanceM: 260,
       durationSec: 210,
       mode: "ramp",
-      slopePct: 4.8, // Compliant gentle ramp (<5% ADA / standard guideline)
+      slopePct: 4.8, // Synthetic gentle slope ramp specification
       widthCm: 160,
       surface: "smooth",
       lighting: 2,

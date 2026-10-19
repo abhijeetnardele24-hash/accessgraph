@@ -248,7 +248,7 @@ export const CustomProfileModal: React.FC<CustomProfileModalProps> = ({
                   checked={requireWorkingLift}
                   onChange={(e) => setRequireWorkingLift(e.target.checked)}
                 />
-                <span>Require Operational Elevators (Avoid lift outages)</span>
+                <span>Avoid Out-of-Service Lifts (Prohibit lifts with active outages)</span>
               </label>
 
               <label className="checkbox-label">

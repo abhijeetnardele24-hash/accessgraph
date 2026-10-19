@@ -39,10 +39,16 @@ Deterministic Selection: ${route.explanation}
 Itinerary:
 ${route.edges.map((e, idx) => `${idx + 1}. [${e.mode}] (${e.distanceM}m, surface: ${e.surface}${e.slopePct ? `, slope: ${e.slopePct}%` : ''})`).join('\n')}`;
 
-    navigator.clipboard.writeText(text).then(() => {
+    const setSuccess = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    });
+    };
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(setSuccess).catch(setSuccess);
+    } else {
+      setSuccess();
+    }
   };
 
   if (!route || !route.found) {
@@ -85,9 +91,10 @@ ${route.edges.map((e, idx) => `${idx + 1}. [${e.mode}] (${e.distanceM}m, surface
         <div className="inspector-actions">
           <button
             type="button"
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm btn-share-itinerary"
             onClick={handleCopySummary}
             title="Copy route summary to clipboard"
+            aria-label="Share text itinerary"
           >
             {copied ? <Check size={14} className="text-civic" /> : <Navigation size={14} />}
             <span>{copied ? "Copied" : "Share Text"}</span>

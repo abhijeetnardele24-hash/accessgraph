@@ -236,7 +236,7 @@ export const RouteControls: React.FC<RouteControlsProps> = ({
           {currentProfile.requireWorkingLift && (
             <div className="constraint-badge-item">
               <span className="constraint-badge-icon">✓</span>
-              <span>Requires Operational Elevators</span>
+              <span>Avoid Out-of-Service Lifts</span>
             </div>
           )}
           {currentProfile.maxSlopePct !== undefined && (

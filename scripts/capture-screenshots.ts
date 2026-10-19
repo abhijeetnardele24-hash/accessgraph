@@ -86,7 +86,7 @@ async function capture() {
 
     await context.close();
 
-    // 4. Mobile Viewport (iPhone 14 / 390x844)
+    // 4. Mobile Viewport (iPhone 14 / 390x844) - Composed to feature map + route
     console.log("Capturing 04-mobile-planner.png ...");
     const mobileContext = await browser.newContext({
       viewport: { width: 390, height: 844 },
@@ -97,7 +97,15 @@ async function capture() {
     await mobilePage.goto("http://localhost:4173/");
     await mobilePage.waitForSelector(".app-header");
     await mobilePage.waitForSelector(".planner-layout");
-    await mobilePage.waitForTimeout(500);
+    await mobilePage.waitForSelector(".map-canvas-container");
+    // Scroll down to frame the interactive map and active route clearly
+    await mobilePage.evaluate(() => {
+      const mapEl = document.querySelector(".map-view-wrapper");
+      if (mapEl) {
+        mapEl.scrollIntoView({ behavior: "instant", block: "start" });
+      }
+    });
+    await mobilePage.waitForTimeout(600);
     await mobilePage.screenshot({
       path: path.join(screenshotDir, "04-mobile-planner.png"),
       fullPage: false,

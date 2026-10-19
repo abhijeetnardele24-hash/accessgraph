@@ -43,6 +43,12 @@ jobs:
       - name: Vitest Unit & Component Coverage
         run: npm test
 
+      - name: Reproducible Routing & Access Debt Benchmarks
+        run: npm run benchmark
+
+      - name: Evidence & Metric Synchronization Check
+        run: npm run evidence:check
+
       - name: Production Vite Build
         run: npm run build
 

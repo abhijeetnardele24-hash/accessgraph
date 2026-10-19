@@ -131,7 +131,7 @@ export function checkEdgeHardConstraints(
 export function getActiveHardConstraintDescriptions(profile: RouteProfile): string[] {
   const list: string[] = [];
   if (profile.noStairs) list.push("Strictly Step-Free (No Stairs)");
-  if (profile.requireWorkingLift) list.push("Requires Operational Elevators");
+  if (profile.requireWorkingLift) list.push("Avoid Out-of-Service Lifts");
   if (profile.maxSlopePct !== undefined) list.push(`Maximum Incline: ${profile.maxSlopePct}%`);
   if (profile.minWidthCm !== undefined) list.push(`Minimum Clear Path Width: ${profile.minWidthCm}cm`);
   if (profile.excludeUnevenSurface) list.push("Excludes Uneven Surfaces");

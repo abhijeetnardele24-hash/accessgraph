@@ -13,6 +13,8 @@
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "benchmark": "tsx scripts/run-benchmarks.ts",
+    "evidence:check": "tsx scripts/check-evidence.ts",
     "audit": "npm audit --omit=dev --audit-level=high",
     "security-scan": "node scripts/security-scan.cjs"
   },
@@ -35,6 +37,7 @@
     "@vitest/coverage-v8": "^2.1.8",
     "eslint": "^10.13.0",
     "jsdom": "^26.0.0",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.71.2",
     "vite": "^5.4.14",

@@ -28,7 +28,7 @@ Standard digital navigation tools optimize strictly for unconstrained Euclidean 
 At the same time, university facilities management operates with constrained maintenance budgets. When institutions lack quantitative network data on which physical bottlenecks cause the greatest collective disruption across daily student journeys, repair scheduling risks becoming reactive rather than systemically optimized.
 
 **AccessGraph bridges this divide with a dual-engine architecture:**
-1. **For the Student:** An accessible, private, 100% offline-capable wayfinding engine that strictly enforces safety constraints (zero stairs, elevator status, maximum slope, surface texture) and optimizes paths across personalized multi-objective cost factors using OpenStreetMap accessibility attributes.
+1. **For the Student:** An accessible, private wayfinding engine that reloads and operates offline after first online load, strictly enforces safety constraints (zero stairs, active elevator status, maximum slope, surface texture), and optimizes paths across personalized multi-objective cost factors using OpenStreetMap accessibility attributes.
 2. **For the University:** An **"Access Debt"** diagnostic audit engine that quantifies the collective temporal burden imposed on mobility-impaired community members and ranks capital repairs by maximum network-wide travel time recovered and disconnected routes restored.
 
 ---
@@ -66,7 +66,7 @@ All screenshots below are authentic captures from our automated Playwright visua
 ---
 
 ### 3. The Access Debt Diagnostic Dashboard & Prioritized Repairs
-*The institutional view audits 8 calibrated campus benchmark scenarios. The counterfactual repair simulator identifies that resolving the Science Complex Lift Outage recovers 2.9 minutes per student transit trip, ranking it as the #1 capital intervention. Clicking **"Simulate Fix"** immediately tests the resolution live.*
+*The institutional view audits 8 documented synthetic benchmark scenarios. The counterfactual repair simulator identifies that resolving the Science Complex Lift Outage recovers 2.9 minutes per student transit trip, ranking it as the #1 capital intervention. Clicking **"Simulate Fix"** immediately tests the resolution live.*
 
 <div align="center">
   <img src="./docs/assets/screenshots/03-access-debt-dashboard.png" alt="AccessGraph Access Debt Diagnostic Dashboard with Ranked Repairs" width="100%" />
@@ -104,7 +104,7 @@ Route Inspector explicitly verifies:
                    ↓
 [4. Access Debt Diagnostics Opened]
 User clicks "Access Debt Diagnostic" in the header navigation.
-Average Access Ratio: 1.22× (under the synthetic benchmark fixture, accessible paths require an average 1.22× the fastest unconstrained duration).
+Average Access Ratio: 1.22× with active barriers (vs 1.17× baseline without barriers, proving strict monotonicity).
 Prioritized Repair Candidates Table ranks Lift Outage as #1 Capital Priority.
                    ↓
 [5. Interactive Counterfactual Repair Simulated]
@@ -216,6 +216,12 @@ npm test
 # Run multi-viewport Playwright E2E & Axe accessibility audit (45 executions)
 npm run test:e2e
 
+# Run reproducible routing and Access Debt performance benchmarks
+npm run benchmark
+
+# Verify metric synchronization and evidence artifacts
+npm run evidence:check
+
 # Run production security & secret leak scanner
 npm run security-scan
 
@@ -230,7 +236,9 @@ npm run audit
 | **Code Quality** | `eslint` | 0 ESLint errors/warnings | **PASS** (0 warnings) |
 | **Unit Test Suite** | Vitest v8 | $\ge 85\%$ lines, $\ge 80\%$ branches | **PASS** (94.07% stmts, 36/36 tests) |
 | **E2E Viewports** | Playwright | 320px, 390px, 768px, 1280px, 1920px | **PASS** (45/45 executions) |
-| **Accessibility Audit** | `@axe-core/playwright` | WCAG 2.1 AA & WCAG 2.2 AA | **PASS** (0 violations) |
+| **Accessibility Audit** | `@axe-core/playwright` | WCAG 2.1 AA & WCAG 2.2 AA (5 states) | **PASS** (0 violations) |
+| **Performance Benchmarks** | `scripts/run-benchmarks.ts` | 1,000 Dijkstra runs + 200 audits | **PASS** (0.022ms Dijkstra, 0.561ms audit) |
+| **Evidence & Metric Check** | `scripts/check-evidence.ts` | Monotonicity + JSON artifact sync | **PASS** (1.165x $\rightarrow$ 1.223x debt) |
 | **Secret Scanning** | `scripts/security-scan.cjs` | Full Git history + working tree | **PASS** (0 secrets found) |
 | **Dependency Audit** | `npm audit` | 0 high/critical vulnerabilities | **PASS** (0 vulnerabilities) |
 | **Bundle Size** | Vite Manual Chunks | Minimal footprint (<250KB gzip) | **PASS** (~63KB gzip total) |

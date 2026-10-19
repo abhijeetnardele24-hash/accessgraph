@@ -82,34 +82,57 @@ test.describe("AccessGraph Comprehensive E2E Verification Suite", () => {
     await page.goto("./");
     await page.waitForSelector(".planner-layout");
 
+    // A. Add Barrier Modal focus lifecycle
     const addBarrierBtn = page.locator("button.btn-add-barrier");
     await addBarrierBtn.focus();
     await addBarrierBtn.click();
 
-    const modal = page.locator(".modal-card");
-    await expect(modal).toBeVisible();
+    const barrierModal = page.locator(".modal-card");
+    await expect(barrierModal).toBeVisible();
 
     // Verify close button received initial focus
-    const closeBtn = modal.locator("button[aria-label='Close dialog']");
-    await expect(closeBtn).toBeFocused();
+    const barrierCloseBtn = barrierModal.locator("button[aria-label='Close dialog']");
+    await expect(barrierCloseBtn).toBeFocused();
 
     // Reverse Tab wrapping: Shift+Tab on first element wraps to last element (submit button)
     await page.keyboard.press("Shift+Tab");
-    const submitBtn = modal.locator("button[type='submit']");
-    await expect(submitBtn).toBeFocused();
+    const barrierSubmitBtn = barrierModal.locator("button[type='submit']");
+    await expect(barrierSubmitBtn).toBeFocused();
 
     // Forward Tab wrapping: Tab on last element wraps back to first element (close button)
     await page.keyboard.press("Tab");
-    await expect(closeBtn).toBeFocused();
+    await expect(barrierCloseBtn).toBeFocused();
 
     // Escape closes modal and returns focus to opener
     await page.keyboard.press("Escape");
     await expect(page.locator(".modal-backdrop")).not.toBeVisible();
     await expect(addBarrierBtn).toBeFocused();
+
+    // B. Custom Profile Modal focus lifecycle
+    const customizeBtn = page.locator("button.customize-profile-btn");
+    await customizeBtn.focus();
+    await customizeBtn.click();
+
+    const customModal = page.locator(".modal-custom-profile");
+    await expect(customModal).toBeVisible();
+
+    const customCloseBtn = customModal.locator("button[aria-label='Close custom profile dialog']");
+    await expect(customCloseBtn).toBeFocused();
+
+    await page.keyboard.press("Shift+Tab");
+    const customSubmitBtn = customModal.locator("button[type='submit']");
+    await expect(customSubmitBtn).toBeFocused();
+
+    await page.keyboard.press("Tab");
+    await expect(customCloseBtn).toBeFocused();
+
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".modal-custom-profile")).not.toBeVisible();
+    await expect(customizeBtn).toBeFocused();
   });
 
-  // Test 4: Custom Profile Workflow & Route Recalculation
-  test("4. Custom Profile Workflow: Customize constraints and observe active indicator", async ({
+  // Test 4: Custom Profile Workflow & Local Storage Persistence
+  test("4. Custom Profile Workflow: Customize constraints, persist in localStorage, and reload", async ({
     page,
   }) => {
     await page.goto("./");
@@ -135,6 +158,22 @@ test.describe("AccessGraph Comprehensive E2E Verification Suite", () => {
     await expect(customChip).toBeVisible();
     await expect(customChip).toHaveClass(/selected/);
     await expect(page.locator(".badge-custom-tag")).toHaveText("Custom");
+    await expect(customChip).toContainText("Gentle Incline Only");
+
+    // Local Persistence Verification: Reload page and assert custom profile remains active and configured
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForSelector(".planner-layout");
+
+    const reloadedCustomChip = page.locator(".preset-chip-custom");
+    await expect(reloadedCustomChip).toBeVisible();
+    await expect(reloadedCustomChip).toHaveClass(/selected/);
+    await expect(reloadedCustomChip).toContainText("Gentle Incline Only");
+
+    // Verify stored configuration inside modal
+    await page.locator("button.customize-profile-btn").click();
+    await expect(page.locator(".modal-custom-profile")).toBeVisible();
+    await expect(page.locator("#custom-max-slope")).toHaveValue("4");
+    await page.keyboard.press("Escape");
   });
 
   // Test 5: Real Service Worker Offline Test
@@ -185,19 +224,42 @@ test.describe("AccessGraph Comprehensive E2E Verification Suite", () => {
   });
 
   // Test 6: Text Itinerary Equivalence & Turn-by-Turn Clarity
-  test("6. Text Itinerary Equivalence: Turn-by-turn directions and share action", async ({ page }) => {
+  test("6. Text Itinerary Equivalence: Turn-by-turn directions, edge modes, and share action", async ({ page, context }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]).catch(() => {});
     await page.goto("./");
     await page.waitForSelector(".itinerary-list");
 
     const steps = page.locator(".itinerary-step");
-    const count = await steps.count();
-    expect(count).toBeGreaterThan(0);
+    // Default fastest route between Library Entrance and Science Lab has exactly 6 steps
+    await expect(steps).toHaveCount(6);
 
-    // Each step must display a step number, title, mode, distance
-    const firstStep = steps.first();
-    await expect(firstStep.locator(".step-number")).toHaveText("1");
-    await expect(firstStep.locator(".step-title")).toBeVisible();
-    await expect(firstStep.locator(".step-details")).toContainText("m");
+    // Verify turn-by-turn steps match exact sequential topology
+    const stepModes = await steps.locator(".step-badge.capitalize").allTextContents();
+    const cleanModes = stepModes.map((m) => m.trim().toLowerCase());
+    expect(cleanModes[0]).toBe("outdoor");
+    expect(cleanModes[4]).toBe("stairs");
+    expect(cleanModes[5]).toBe("corridor");
+
+    // Verify destination step contains Science Lab
+    const lastStep = steps.last();
+    await expect(lastStep.locator(".step-title")).toContainText("Science Lab");
+
+    // Switch to Step-Free profile and verify itinerary updates synchronously
+    const stepFreeChip = page.getByRole("radio", { name: /Step-Free/i });
+    await stepFreeChip.click();
+
+    // In step-free with default lift outage, routes via covered ramp directly to Floor 2 (5 steps)
+    await expect(steps).toHaveCount(5);
+    const stepFreeModes = await steps.locator(".step-badge.capitalize").allTextContents();
+    const cleanStepFreeModes = stepFreeModes.map((m) => m.trim().toLowerCase());
+    expect(cleanStepFreeModes).toContain("ramp");
+    expect(cleanStepFreeModes).not.toContain("stairs");
+
+    // Test Share / Copy Itinerary action
+    const shareBtn = page.locator(".btn-share-itinerary");
+    await expect(shareBtn).toBeVisible();
+    await shareBtn.click();
+    await expect(shareBtn).toContainText("Copied");
   });
 
   // Test 7: Zero Uncaught Errors & Zero Console Errors
@@ -228,16 +290,35 @@ test.describe("AccessGraph Comprehensive E2E Verification Suite", () => {
     expect(errorLogs).toEqual([]);
   });
 
-  // Test 8: Zero Horizontal Page Overflow
-  test("8. Zero Horizontal Page Overflow at Target Viewport", async ({ page }) => {
+  // Test 8: Zero Horizontal Page Overflow & Touch Target Standards
+  test("8. Zero Horizontal Page Overflow and Minimum Touch Target Standards", async ({ page }) => {
     await page.goto("./");
     await page.waitForSelector(".planner-layout");
 
     const hasHorizontalOverflow = await page.evaluate(() => {
       return document.documentElement.scrollWidth > window.innerWidth;
     });
-
     expect(hasHorizontalOverflow).toBe(false);
+
+    // On mobile viewports (<= 768px), verify primary touch targets are at least 44px in height
+    const viewportSize = page.viewportSize();
+    if (viewportSize && viewportSize.width <= 768) {
+      const primaryControls = [
+        page.locator(".nav-tab-btn").first(),
+        page.locator(".preset-chip-btn").first(),
+        page.locator("button.btn-add-barrier"),
+      ];
+
+      for (const control of primaryControls) {
+        if (await control.isVisible()) {
+          const box = await control.boundingBox();
+          expect(box).not.toBeNull();
+          if (box) {
+            expect(box.height).toBeGreaterThanOrEqual(43.5);
+          }
+        }
+      }
+    }
   });
 
   // Test 9: Axe Accessibility Scans across 5 Application States
@@ -248,13 +329,13 @@ test.describe("AccessGraph Comprehensive E2E Verification Suite", () => {
     await page.waitForSelector(".planner-layout");
     await page.mouse.move(0, 0);
 
-    // State A: Planner Default
+    // State 1: Planner Default
     const auditPlanner = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
       .analyze();
     expect(auditPlanner.violations).toEqual([]);
 
-    // State B: Step-free Reroute State
+    // State 2: Step-free Reroute State
     const stepFreeChip = page.getByRole("radio", { name: /Step-Free/i });
     await stepFreeChip.click();
     await page.mouse.move(0, 0);
@@ -263,8 +344,27 @@ test.describe("AccessGraph Comprehensive E2E Verification Suite", () => {
       .analyze();
     expect(auditStepFree.violations).toEqual([]);
 
-    // State C: Open Add Barrier Modal
+    // State 3: Strict No-Route Diagnostic State
+    // Block ramp while Step-Free is selected (elevator already out of service, stairs prohibited)
     const addBarrierBtn = page.locator("button.btn-add-barrier");
+    await addBarrierBtn.click();
+    await page.waitForSelector(".modal-card");
+    await page.selectOption("#barrier-edge", "edge_courtyard_ramp_f2");
+    await page.fill("#barrier-note", "Axe audit emergency barrier");
+    await page.click("button[type='submit']");
+    await page.waitForSelector(".inspector-panel.empty");
+    await page.mouse.move(0, 0);
+
+    const auditNoRoute = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(auditNoRoute.violations).toEqual([]);
+
+    // Reset barriers back to default state
+    const resetBtn = page.locator("button.btn-text-action", { hasText: "Reset" });
+    await resetBtn.click();
+
+    // State 4: Open Add Barrier Modal
     await addBarrierBtn.click();
     await page.waitForSelector(".modal-card");
     const auditModal = await new AxeBuilder({ page })
@@ -276,7 +376,7 @@ test.describe("AccessGraph Comprehensive E2E Verification Suite", () => {
     await page.keyboard.press("Escape");
     await expect(page.locator(".modal-backdrop")).not.toBeVisible();
 
-    // State D: Access Debt View
+    // State 5: Access Debt View
     const debtTabBtn = page.locator("button.nav-tab-btn", { hasText: "Access Debt Diagnostic" });
     await debtTabBtn.click();
     await page.waitForSelector(".debt-dashboard-container");

@@ -62,10 +62,10 @@ export const ROUTE_PROFILES: Record<string, RouteProfile> = {
     requireWorkingLift: false,
     excludeUnevenSurface: false,
     weights: {
-      time: 0.6,
+      time: 1.0,
       slope: 0.2,
       lowLight: 0.2,
-      sensoryLoad: 2.2, // Strong penalty for high noise & crowd density
+      sensoryLoad: 1.0, // Significant penalty for noise while maintaining ground transit efficiency
       exposedHeat: 0.3,
       distanceFromRest: 0.2,
     },

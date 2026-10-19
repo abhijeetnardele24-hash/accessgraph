@@ -12,7 +12,7 @@
 AccessGraph was evaluated against three rigorous criteria:
 1. **Mathematical Determinism & Constraint Adherence:** Verifying that route calculation strictly honors hard safety limits (zero stairs on step-free, maximum slope thresholds, clear path width, barrier evaluation time windows) and generates identical paths across repeated invocations and randomized edge ordering.
 2. **Access Debt Efficacy:** Demonstrating that the system correctly pinpoints high-impact physical bottlenecks and ranks capital repair candidates to maximize network-wide accessibility and travel time recovery.
-3. **Execution Performance & Robustness:** Providing client-side calculation (median single-route latency of 0.023ms; median 8-scenario audit latency of 0.731ms) and 100% offline functionality via Service Worker caching.
+3. **Execution Performance & Robustness:** Providing client-side calculation (median single-route latency of 0.022ms; median 8-scenario audit latency of 0.561ms) and 100% offline functionality via Service Worker caching.
 
 ---
 
@@ -57,8 +57,9 @@ AccessGraph evaluates campus equity against 8 benchmark routes representing dive
 ### Summary Statistics
 - **Total Scenarios Evaluated:** 8
 - **Disconnected Routes:** 0 (all benchmark routes have feasible paths under default synthetic fixture)
-- **Average Access Penalty:** **1.22×** (accessible duration vs fastest baseline across connected scenarios)
+- **Baseline Access Penalty (No Outages):** **1.165×** (~1.17× across all 8 benchmark routes)
 - **Active Outages in Default Fixture:** 2 (`barrier_lift_outage`, `barrier_dining_repair`)
+- **Active Access Penalty:** **1.223×** (~1.22× across all 8 benchmark routes; verified strict monotonic increase $1.223 > 1.165$)
 - **Top Repair Candidate:** `barrier_lift_outage` (Rank 1, +2.9 min recovered for Step-Free profile)
 
 ---
@@ -69,8 +70,8 @@ Metrics measured via committed benchmark harness (`scripts/run-benchmarks.ts`), 
 
 | Benchmark Operation | Sample Size | Mean Latency | Median Latency | p95 Latency | Memory & Network |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Single-trip `findRoute` (Dijkstra + soft scoring) | 1,000 iterations | **0.031 ms** | **0.023 ms** | **0.069 ms** | 100% Client-Side, 0 Network requests |
-| Complete `evaluateAccessDebt` (8 scenarios + ranking) | 200 iterations | **0.776 ms** | **0.731 ms** | **1.368 ms** | 100% Client-Side, 0 Network requests |
+| Single-trip `findRoute` (Dijkstra + soft scoring) | 1,000 iterations | **0.027 ms** | **0.022 ms** | **0.044 ms** | 100% Client-Side, 0 Network requests |
+| Complete `evaluateAccessDebt` (8 scenarios + ranking) | 200 iterations | **0.608 ms** | **0.561 ms** | **0.897 ms** | 100% Client-Side, 0 Network requests |
 
 *Environment: Node.js v24.11.1, Windows x64, 13th Gen Intel Core i5-13420H.*
 
@@ -80,24 +81,24 @@ Metrics measured via committed benchmark harness (`scripts/run-benchmarks.ts`), 
 
 ### 6.1 Unit & Component Testing (Vitest v8)
 ```
- ✓ src/domain/constraints.test.ts (11 tests)
- ✓ src/domain/routeEngine.test.ts (9 tests)
+ ✓ src/domain/constraints.test.ts (13 tests)
+ ✓ src/domain/routeEngine.test.ts (11 tests)
  ✓ src/domain/accessDebt.test.ts (6 tests)
- ✓ src/components/components.test.tsx (10 tests)
+ ✓ src/components/components.test.tsx (6 tests)
 
  Test Files  4 passed (4)
       Tests  36 passed (36)
  Statements: 94.07%
- Branches:   84.69%
- Functions:  97.61%
- Lines:      94.40%
+ Branches:   89.40%
+ Functions:  100.00%
+ Lines:      94.07%
 ```
 
 ### 6.2 Automated Accessibility & E2E Verification (`@axe-core/playwright`)
 Evaluated across 5 viewport projects (Mobile Small 320px, Mobile Standard 390px, Tablet 768px, Desktop HD 1280px, Desktop Large 1920px):
 - **Distinct Test Definitions:** 9 distinct E2E specifications
 - **Total Executions:** 45 browser test runs
-- **WCAG 2.1 & 2.2 Level AA Violations:** **0 violations** across all 5 states (Default Planner, Step-free, Strict No-Route, Modal Focus Traps, Access Debt Dashboard).
+- **WCAG 2.1 & 2.2 Level AA Violations:** **0 violations** across all 5 interaction states (Default Planner, Step-free, Strict No-Route, Modal Focus Traps, Access Debt Dashboard).
 - **Contrast Ratios:** All body text $\ge 5.5:1$ (exceeding WCAG 4.5:1 threshold).
 - **Interactive Targets:** All buttons maintain minimum $44 \times 44\text{ px}$ target boundaries.
 - **Focus Management:** Full dialog Tab/Shift+Tab cycle, Escape close, and opener focus restoration verified.

@@ -121,7 +121,7 @@ describe("Constraint Filter (Hard Rules)", () => {
   it("generates human-readable constraint descriptions", () => {
     const descriptions = getActiveHardConstraintDescriptions(ROUTE_PROFILES.step_free);
     expect(descriptions).toContain("Strictly Step-Free (No Stairs)");
-    expect(descriptions).toContain("Requires Operational Elevators");
+    expect(descriptions).toContain("Avoid Out-of-Service Lifts");
     expect(descriptions).toContain("Maximum Incline: 6%");
   });
 

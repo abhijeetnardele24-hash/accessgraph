@@ -11,6 +11,33 @@ interface CampusMapProps {
   onSelectNode: (nodeId: string, role: "origin" | "destination") => void;
 }
 
+interface NodeLabelConfig {
+  displayText?: string;
+  dx: number;
+  dy: number;
+  textAnchor: "start" | "middle" | "end";
+}
+
+const NODE_LABEL_CONFIGS: Record<string, NodeLabelConfig> = {
+  node_gate: { dx: 0, dy: 18, textAnchor: "middle" },
+  node_admin: { dx: 0, dy: 18, textAnchor: "middle" },
+  node_humanities: { dx: 0, dy: 18, textAnchor: "middle" },
+  node_lib_entrance: { dx: 0, dy: -12, textAnchor: "middle" },
+  node_courtyard: { dx: 0, dy: 20, textAnchor: "middle" },
+  node_rest_pavilion: { dx: 0, dy: 18, textAnchor: "middle" },
+  node_water_hub: { displayText: "Hydration Station", dx: 14, dy: 4, textAnchor: "start" },
+  node_dining: { dx: 0, dy: 18, textAnchor: "middle" },
+  // Science Complex zone - engineered spacing to eliminate collisions
+  node_ramp_landing_f2: { displayText: "Ramp Landing (F2)", dx: -12, dy: -8, textAnchor: "end" },
+  node_sci_lift_f2: { displayText: "Science Lift (F2)", dx: -12, dy: 4, textAnchor: "end" },
+  node_sci_stairs_top: { displayText: "Stairs (Top F2)", dx: 12, dy: 4, textAnchor: "start" },
+  node_sci_lab: { displayText: "Science Lab", dx: 0, dy: -12, textAnchor: "middle" },
+  node_science_quad: { displayText: "Science Quad", dx: -12, dy: 16, textAnchor: "end" },
+  node_sci_lift_ground: { displayText: "Science Lift (Ground)", dx: -12, dy: 4, textAnchor: "end" },
+  node_sci_foyer: { displayText: "Science Foyer", dx: 0, dy: 20, textAnchor: "middle" },
+  node_sci_stairs_bottom: { displayText: "Stairs (Bottom)", dx: 12, dy: 4, textAnchor: "start" },
+};
+
 export const CampusMap: React.FC<CampusMapProps> = ({
   dataset,
   routeResult,
@@ -128,8 +155,8 @@ export const CampusMap: React.FC<CampusMapProps> = ({
         {/* Science Complex (Ground & Floor 2 zones) */}
         <rect x="620" y="80" width="310" height="240" rx="8" fill="#FFFFFF" stroke="#164E35" strokeWidth="1.8" />
         <rect x="630" y="90" width="290" height="85" rx="4" fill="#F0F7F3" stroke="#A7D4B6" strokeWidth="1" />
-        <text x="775" y="110" textAnchor="middle" fill="#164E35" fontSize="11" fontWeight="800">SCIENCE COMPLEX (FLOOR 2 LEVEL)</text>
-        <text x="775" y="270" textAnchor="middle" fill="#52585C" fontSize="11" fontWeight="700">SCIENCE GROUND ATRIUM</text>
+        <text x="640" y="106" textAnchor="start" fill="#164E35" fontSize="10" fontWeight="800" letterSpacing="0.5">SCIENCE COMPLEX (FLOOR 2 LEVEL)</text>
+        <text x="640" y="202" textAnchor="start" fill="#52585C" fontSize="10" fontWeight="700" letterSpacing="0.5">SCIENCE GROUND ATRIUM</text>
 
         {/* Edges: Base Layer */}
         {dataset.edges.map((edge) => {
@@ -237,6 +264,12 @@ export const CampusMap: React.FC<CampusMapProps> = ({
           const isOrigin = node.id === selectedOriginId;
           const isDestination = node.id === selectedDestinationId;
           const isInRoute = activeNodeIds.has(node.id);
+          const config = NODE_LABEL_CONFIGS[node.id] || { dx: 0, dy: 18, textAnchor: "middle" };
+          const visibleText = config.displayText || node.label;
+          const accessibleName =
+            visibleText === node.label
+              ? `${node.label} (${node.building}, Floor ${node.floor})`
+              : `${visibleText} — ${node.label} (${node.building}, Floor ${node.floor})`;
 
           return (
             <g
@@ -251,7 +284,7 @@ export const CampusMap: React.FC<CampusMapProps> = ({
               style={{ cursor: "pointer" }}
               tabIndex={0}
               role="button"
-              aria-label={`${node.label} (${node.building}, Floor ${node.floor})`}
+              aria-label={accessibleName}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   onSelectNode(node.id, "origin");
@@ -294,17 +327,18 @@ export const CampusMap: React.FC<CampusMapProps> = ({
                 strokeWidth={2}
               />
 
+              <title>{accessibleName}</title>
               {/* Node Label */}
               <text
-                x={node.x}
-                y={node.y + 18}
-                textAnchor="middle"
+                x={node.x + config.dx}
+                y={node.y + config.dy}
+                textAnchor={config.textAnchor}
                 fill={isOrigin || isDestination || isInRoute ? "#181A1B" : "#52585C"}
                 fontSize={isOrigin || isDestination ? "11.5" : "10"}
                 fontWeight={isOrigin || isDestination ? "800" : isInRoute ? "700" : "500"}
                 style={{ pointerEvents: "none" }}
               >
-                {node.label}
+                {visibleText}
               </text>
             </g>
           );

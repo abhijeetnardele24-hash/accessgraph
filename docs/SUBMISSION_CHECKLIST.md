@@ -11,14 +11,15 @@
 
 - [x] **Static Type Safety:** `npm run typecheck` exits code `0` with 0 errors (`tsc --noEmit`).
 - [x] **Code Quality Linting:** `npm run lint` exits code `0` with 0 warnings (`eslint src tests scripts`).
-- [x] **Unit & Component Testing:** `npm test` runs 36 tests in Vitest v8; all 36 pass with **94.07% statement coverage** and **97.61% function coverage**.
+- [x] **Unit & Component Testing:** `npm test` runs 36 tests in Vitest v8; all 36 pass with **94.07% statement coverage**, **89.40% branch coverage**, and **100% function coverage**.
 - [x] **Deterministic Route Engine:** Dijkstra tie-breaking verified across 20 randomized edge shuffles with `pathKey` preservation.
 - [x] **Barrier Lifecycle Enforcement:** Effective barriers respect `startsAt` and `expiresAt` time boundaries across past, active, and future windows.
 - [x] **Custom Profile Editor:** Modal controls hard constraints (slope %, width, stairs, lifts, uneven surfaces) and soft weights with local storage persistence and active UI indicator.
 - [x] **Dialog Accessibility & Focus Trapping:** Add Barrier and Custom Profile dialogs strictly cycle focus via Tab and Shift+Tab, close on Escape, and restore focus to opener.
 - [x] **Deterministic E2E Verification:** 9 distinct test definitions across 5 viewports (45 total executions) verified via Playwright (`tests/e2e/accessibility.spec.ts`) with 100% pass rate.
 - [x] **Automated Accessibility Compliance:** Automated `@axe-core/playwright` audit asserts **0 WCAG 2.1 AA / 2.2 AA violations** across all 5 interaction states (Default Planner, Step-free, Strict No-Route, Modal Focus Traps, Access Debt Dashboard).
-- [x] **Service Worker Offline Caching:** Real Service Worker navigation and asset serving verified offline under simulated network disconnection.
+- [x] **Reproducible Benchmarks & Metric Synchronization:** `npm run benchmark` and `npm run evidence:check` verify 0.022ms Dijkstra median, 0.561ms audit median, baseline 1.165×, and active 1.223× debt.
+- [x] **Service Worker Offline Caching:** Real Service Worker navigation and asset serving verified offline under simulated network disconnection (reloads and operates offline after first online load).
 - [x] **Security & Secret Scanner:** `npm run security-scan` scans full Git commit history, working tree, and `dist/` bundle: **0 secrets found**.
 - [x] **Dependency Security Audit:** `npm run audit` (`npm audit --omit=dev --audit-level=high`) reports **0 high/critical vulnerabilities**.
 - [x] **Production Bundle Optimization:** `npm run build` completes cleanly, chunked into vendor, icons, and core bundle (total gzip ~63 KB).

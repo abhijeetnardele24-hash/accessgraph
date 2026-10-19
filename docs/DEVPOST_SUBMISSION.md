@@ -14,7 +14,7 @@ For students and campus visitors with physical disabilities, mobility impairment
 At the same time, university facilities management teams operate with constrained annual maintenance budgets. Without quantitative network data showing which physical bottlenecks cause the greatest collective disruption across daily student journeys, repair scheduling risks becoming reactive rather than systemically optimized.
 
 We built **AccessGraph** to solve both sides of this civic accessibility challenge:
-1. **For the Student:** An accessible, private, 100% offline-capable wayfinding engine that enforces strict safety constraints (zero stairs, active elevator status, slope limits, surface textures) and optimizes routes across personalized multi-objective cost factors using OpenStreetMap accessibility attributes.
+1. **For the Student:** An accessible, private wayfinding engine that reloads and operates offline after first online load, enforcing strict safety constraints (zero stairs, active elevator status, slope limits, surface textures) and optimizing routes across personalized multi-objective cost factors using OpenStreetMap accessibility attributes.
 2. **For the University:** An **"Access Debt"** diagnostic engine that quantitatively audits campus infrastructure, measuring the collective time burden imposed on disabled community members and ranking capital repairs by maximum network-wide time and connectivity restored.
 
 ---
@@ -31,7 +31,7 @@ AccessGraph functions as a dual-engine progressive web application:
 - **Multi-Objective Cost Matrix:** Transparent breakdown displaying physical duration, incline profiles, lighting factors, and sensory burden.
 
 ### 2. The Access Debt Diagnostic Dashboard
-- **Institutional Equity Metric:** Formulates $\text{AccessPenalty} = \text{accessibleRouteTime} / \text{fastestRouteTime}$ across representative benchmark scenarios (averaging 1.22× across connected routes under the default synthetic fixture). Disconnected routes are tracked separately without arbitrary numerical distortion.
+- **Institutional Equity Metric:** Formulates $\text{AccessPenalty} = \text{accessibleRouteTime} / \text{fastestRouteTime}$ across representative benchmark scenarios (averaging 1.22× across connected routes under the default synthetic fixture, reflecting a monotonic increase from 1.17× baseline without active barriers). Disconnected routes are tracked separately without arbitrary numerical distortion.
 - **Counterfactual Repair Simulator:** Tests hypothetical repairs for every active facility disruption on campus (such as an elevator motor overhaul or paving stone resurfacing).
 - **Prioritized Capital Ranking:** Mathematically ranks maintenance work orders by:
   1. Isolated routes restored ($\Delta \text{Disconnected}$ descending);
@@ -49,10 +49,10 @@ AccessGraph functions as a dual-engine progressive web application:
 - **Interactive Schematic Map:** Hand-crafted accessible SVG campus topology modeling a synthetic academic complex with multi-floor waypoints, courtyards, library, dining commons, and courtyard ramp bridge.
 - **Offline & Persistence:** Service Worker implementation (`sw.js`) with cache-first navigation fallback and local browser storage (`localStorage`) for custom profiles and simulated barriers.
 - **Testing & Quality Assurance:**
-  - **Vitest v8:** 36 unit and component tests achieving **94.07% statement coverage** and **97.61% function coverage**.
-  - **Playwright & `@axe-core/playwright`:** 9 distinct end-to-end test suites across 5 viewports (320px to 1920px, 45 total executions), asserting **0 WCAG 2.2 AA violations**.
+  - **Vitest v8:** 36 unit and component tests achieving **94.07% statement coverage**, **89.40% branch coverage**, and **100% function coverage**.
+  - **Playwright & `@axe-core/playwright`:** 9 distinct end-to-end test suites across 5 viewports (320px to 1920px, 45 total executions), asserting **0 WCAG 2.2 AA violations** across all 5 interaction states.
   - **Security Scanner:** Custom streaming scanner verifying full Git commit history and production dist bundles for zero credential leaks.
-  - **Benchmark Harness:** Committed reproducible benchmark script (`scripts/run-benchmarks.ts`) measuring 0.023ms median single-route Dijkstra latency and 0.731ms median 8-scenario Access Debt audit latency.
+  - **Benchmark Harness:** Committed reproducible benchmark script (`scripts/run-benchmarks.ts`) measuring 0.022ms median single-route Dijkstra latency and 0.561ms median 8-scenario Access Debt audit latency.
 
 ---
 

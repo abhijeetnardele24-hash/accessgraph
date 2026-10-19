@@ -350,6 +350,26 @@ button {
     height: auto;
     border-left: none;
   }
+
+  /* WCAG 2.5.5 / 2.5.8 Touch Targets on mobile */
+  .preset-chip-btn {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+  .btn,
+  .btn-add-barrier,
+  .btn-text-action,
+  .btn-share-itinerary,
+  .customize-profile-btn {
+    min-height: 44px;
+  }
+  .map-control-btn {
+    width: 44px;
+    height: 44px;
+  }
+  .nav-tab-btn {
+    min-height: 44px;
+  }
 }
 
 /* ==========================================================================
@@ -1597,3 +1617,20 @@ button {
     scroll-behavior: auto !important;
   }
 }
+
+/* Mobile Touch Targets (WCAG 2.5.5 / 2.5.8) */
+@media (max-width: 768px) {
+  .nav-tab-btn,
+  .preset-chip-btn,
+  .btn,
+  .btn-add-barrier,
+  .customize-profile-btn,
+  .btn-share-itinerary {
+    min-height: 44px !important;
+  }
+  .map-control-btn {
+    width: 44px !important;
+    height: 44px !important;
+  }
+}
+
