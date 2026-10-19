@@ -40,16 +40,17 @@
 - [x] **Upload Unlisted Demo Video:** Uploaded to YouTube; HD processing and copyright checks completed successfully:
   - Video URL: https://youtu.be/LwGtuFbr2i4
 - [ ] **Join Official Hackathon Discord:** Join EurekaDev 2026 participant server and register handle.
-- [ ] **Devpost Form Completion:** Populate all Devpost submission fields using `docs/DEVPOST_SUBMISSION.md`.
+- [x] **Devpost Form Completion:** All required fields populated and saved using `docs/DEVPOST_SUBMISSION.md`.
   - Track: Coding Track — Problem in the Community
   - Project Title: AccessGraph
   - Repository URL: `https://github.com/abhijeetnardele24-hash/accessgraph`
   - Demo Link: `https://abhijeetnardele24-hash.github.io/accessgraph/`
-- [ ] **Preview Links & Assets:** Preview all Markdown links, screenshot embeds, and deployment URL before final submission.
+  - Submitted Project: `https://devpost.com/software/accessgraph-bdukam`
+- [x] **Preview Links & Assets:** Verified the judge-facing story, embedded video, four-item media carousel, GitHub repository, and live deployment links.
 
 ---
 
 ## 3. Final Submission Confirmation
 
-- [ ] **Submit Devpost Entry:** Click submit on Devpost before the deadline (20 Oct 2026, 5:00 PM CDT / 21 Oct 2026, 3:30 AM IST).
+- [x] **Submit Devpost Entry:** Devpost confirmed “Project submitted!” for EurekaDev 2026 at `https://devpost.com/software/accessgraph-bdukam`.
 - [ ] **Save Confirmation Proof:** Record public Devpost project URL and confirmation receipt timestamp.
