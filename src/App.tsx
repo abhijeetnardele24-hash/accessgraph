@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { DEMO_CAMPUS } from "./data/demoCampus";
 import { ROUTE_PROFILES } from "./domain/profiles";
-import { Barrier } from "./domain/types";
+import { Barrier, RouteProfile } from "./domain/types";
 import { findRoute } from "./domain/routeEngine";
 import { evaluateAccessDebt } from "./domain/accessDebt";
 import {
@@ -9,6 +9,8 @@ import {
   saveStoredBarriers,
   loadStoredProfileId,
   saveStoredProfileId,
+  loadStoredCustomProfile,
+  saveStoredCustomProfile,
   resetToDefaultBarriers,
 } from "./services/storage";
 
@@ -18,13 +20,17 @@ import { RouteControls } from "./components/RouteControls";
 import { RouteInspector } from "./components/RouteInspector";
 import { AccessDebtDashboard } from "./components/AccessDebtDashboard";
 import { AddBarrierModal } from "./components/AddBarrierModal";
+import { CustomProfileModal } from "./components/CustomProfileModal";
 
 export const App: React.FC = () => {
   // Application view tab
   const [activeTab, setActiveTab] = useState<"planner" | "access_debt">("planner");
 
-  // Selected Profile ID
+  // Selected Profile ID ("fastest" | "step_free" | "low_vision" | "low_sensory" | "shade_rest" | "custom")
   const [selectedProfileId, setSelectedProfileId] = useState<string>(() => loadStoredProfileId());
+
+  // Custom Profile state
+  const [customProfile, setCustomProfile] = useState<RouteProfile | null>(() => loadStoredCustomProfile());
 
   // Active Incidents / Barriers
   const [barriers, setBarriers] = useState<Barrier[]>(() => loadStoredBarriers());
@@ -33,13 +39,21 @@ export const App: React.FC = () => {
   const [originId, setOriginId] = useState<string>("node_lib_entrance");
   const [destinationId, setDestinationId] = useState<string>("node_sci_lab");
 
-  // Add Barrier Modal state
+  // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
 
   // Profile selection
   const handleProfileSelect = useCallback((profileId: string) => {
     setSelectedProfileId(profileId);
     saveStoredProfileId(profileId);
+  }, []);
+
+  const handleSaveCustomProfile = useCallback((profile: RouteProfile) => {
+    setCustomProfile(profile);
+    saveStoredCustomProfile(profile);
+    setSelectedProfileId("custom");
+    saveStoredProfileId("custom");
   }, []);
 
   // Origin / Destination Swap
@@ -101,7 +115,12 @@ export const App: React.FC = () => {
     []
   );
 
-  const currentProfile = ROUTE_PROFILES[selectedProfileId] || ROUTE_PROFILES.fastest;
+  const currentProfile = useMemo(() => {
+    if (selectedProfileId === "custom" && customProfile) {
+      return customProfile;
+    }
+    return ROUTE_PROFILES[selectedProfileId] || ROUTE_PROFILES.fastest;
+  }, [selectedProfileId, customProfile]);
 
   // Compute live route
   const currentRoute = useMemo(() => {
@@ -138,44 +157,45 @@ export const App: React.FC = () => {
         {activeTab === "planner" ? (
           <div className="planner-layout">
             {/* Left Column: Route Controls & Settings */}
-            <div id="route-controls">
+            <div id="route-controls" className="route-controls-wrapper">
               <RouteControls
                 nodes={DEMO_CAMPUS.nodes}
                 originId={originId}
                 destinationId={destinationId}
                 selectedProfileId={selectedProfileId}
+                currentProfile={currentProfile}
                 activeBarriers={barriers}
                 onOriginChange={setOriginId}
                 onDestinationChange={setDestinationId}
                 onSwapOriginDestination={handleSwapOriginDestination}
                 onProfileSelect={handleProfileSelect}
+                onOpenCustomProfileModal={() => setIsCustomModalOpen(true)}
                 onToggleBarrier={handleToggleBarrier}
                 onOpenAddBarrierModal={() => setIsAddModalOpen(true)}
                 onResetBarriers={handleResetBarriers}
               />
             </div>
 
-            {/* Right Column: Interactive Map & Turn-by-Turn Inspector */}
-            <div className="planner-view">
-              <div className="map-view-wrapper" id="route-map">
-                <CampusMap
-                  dataset={DEMO_CAMPUS}
-                  routeResult={currentRoute || undefined}
-                  activeBarriers={barriers}
-                  selectedOriginId={originId}
-                  selectedDestinationId={destinationId}
-                  onSelectNode={handleSelectNode}
-                />
-              </div>
+            {/* Middle Column: Interactive Map */}
+            <div className="map-view-wrapper" id="route-map">
+              <CampusMap
+                dataset={DEMO_CAMPUS}
+                routeResult={currentRoute || undefined}
+                activeBarriers={barriers}
+                selectedOriginId={originId}
+                selectedDestinationId={destinationId}
+                onSelectNode={handleSelectNode}
+              />
+            </div>
 
-              <div className="inspector-view-wrapper" id="route-itinerary">
-                <RouteInspector
-                  route={currentRoute}
-                  profile={currentProfile}
-                  originNode={originNode}
-                  destinationNode={destinationNode}
-                />
-              </div>
+            {/* Right Column: Turn-by-Turn Inspector & Cost Proof */}
+            <div className="inspector-view-wrapper" id="route-itinerary">
+              <RouteInspector
+                route={currentRoute}
+                profile={currentProfile}
+                originNode={originNode}
+                destinationNode={destinationNode}
+              />
             </div>
           </div>
         ) : (
@@ -204,14 +224,14 @@ export const App: React.FC = () => {
             <span className="footer-title">Privacy &amp; Architecture</span>
             <p className="footer-text">
               <strong>100% Client-Side.</strong> Zero server telemetry, zero third-party cookies, zero tracking scripts.
-              Route computation executes entirely within your browser in ~2ms.
+              Route computation executes entirely within your browser in &lt;1ms.
             </p>
           </div>
 
           <div className="footer-col">
             <span className="footer-title">Honest Disclosures</span>
             <p className="footer-text">
-              Ashoka University campus nodes and incident logs are synthetic demonstration fixtures.
+              Synthetic demonstration fixtures.
               Not certified legal ADA compliance advice.
             </p>
           </div>
@@ -229,7 +249,7 @@ export const App: React.FC = () => {
             GitHub Repository
           </a>
           <span className="footer-dot">•</span>
-          <span>WCAG 2.2 AA Audited</span>
+          <span>Automated Axe Scans: 0 Violations</span>
         </div>
       </footer>
 
@@ -239,6 +259,14 @@ export const App: React.FC = () => {
         onClose={() => setIsAddModalOpen(false)}
         onAddBarrier={handleAddBarrier}
         edges={DEMO_CAMPUS.edges}
+      />
+
+      {/* Custom Profile Modal */}
+      <CustomProfileModal
+        isOpen={isCustomModalOpen}
+        onClose={() => setIsCustomModalOpen(false)}
+        onSaveProfile={handleSaveCustomProfile}
+        initialProfile={currentProfile}
       />
     </div>
   );

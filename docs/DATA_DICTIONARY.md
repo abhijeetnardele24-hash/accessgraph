@@ -60,6 +60,7 @@ Configures hard constraints and soft cost weights tailored to specific user mobi
 | `maxSlopePct` | `number?` | Absolute gradient threshold; steeper paths are rejected |
 | `minWidthCm` | `number?` | Minimum required clearance; narrower paths are rejected |
 | `excludeUnevenSurface`| `boolean`| If `true`, gravel and uneven ground are strictly prohibited |
+| `isCustom` | `boolean?` | `true` if this profile was authored or modified by the user |
 | `weights` | `RouteProfileWeights`| Multi-objective soft penalty weights |
 
 ### 2.2 `RouteProfileWeights`
@@ -87,6 +88,7 @@ Represents a temporary physical disruption, facility maintenance event, or envir
 | `severity` | `1 \| 2 \| 3` | Severity rating: `1` (minor delay), `2` (moderate), `3` (severe impasse) | `3` |
 | `note` | `string` | Contextual explanation of the incident | `"Traction motor overhaul"` |
 | `startsAt` | `string` | ISO 8601 timestamp of incident initiation | `"2026-10-19T08:00:00Z"` |
+| `expiresAt` | `string?` | Optional ISO 8601 timestamp after which the barrier automatically expires | `"2026-10-19T18:00:00Z"` |
 | `demoOnly` | `true` | Explicit label verifying this is a synthetic demonstration fixture | `true` |
 
 ---

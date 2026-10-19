@@ -26,7 +26,7 @@ Mobility and cognitive accessibility preferences represent deeply sensitive pers
 To ensure complete clarity for EurekaDev judges and community reviewers:
 
 - **Synthetic Campus Topology:**  
-  The Ashoka University campus graph (`src/data/demoCampus.ts`), including the 16 nodes, 18 path edges, building names, and coordinates, is a **synthetic demonstration fixture** designed to illustrate realistic multi-level wayfinding challenges (stairs vs. passenger lifts vs. courtyard covered ramp bridges). It does not represent an official or architecturally certified map of Ashoka University.
+  The campus graph (`src/data/demoCampus.ts`), including the 16 nodes, 18 path edges, building names, and coordinates, is a **synthetic demonstration fixture** designed to illustrate realistic multi-level wayfinding challenges (stairs vs. passenger lifts vs. courtyard covered ramp bridges). It does not represent an official or architecturally certified map of any real university.
 - **Simulated Maintenance Incidents:**  
   All barrier records (such as the Science Complex lift motor overhaul or dining terrace resurfacing) are simulated demonstration fixtures intended to showcase deterministic rerouting and Access Debt repair prioritization.
 - **Honest Labeling:**  

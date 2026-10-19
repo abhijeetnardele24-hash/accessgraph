@@ -1,0 +1,212 @@
+{
+  "timestamp": "2026-10-19T12:08:20.269Z",
+  "environment": {
+    "nodeVersion": "v24.11.1",
+    "platform": "win32",
+    "arch": "x64",
+    "cpus": 12,
+    "model": "13th Gen Intel(R) Core(TM) i5-13420H"
+  },
+  "baselineMetrics": {
+    "totalScenarios": 8,
+    "disconnectedCount": 0,
+    "averageAccessPenalty": 1.233
+  },
+  "activeBarriersMetrics": {
+    "totalScenarios": 8,
+    "disconnectedCount": 0,
+    "averageAccessPenalty": 1.223,
+    "activeBarriersCount": 2,
+    "repairCandidates": [
+      {
+        "barrierId": "barrier_lift_outage",
+        "barrierKind": "lift_outage",
+        "edgeId": "edge_sci_lift_shaft",
+        "note": "Science Complex Passenger Lift undergoing scheduled traction motor overhaul. Out of service.",
+        "severity": 3,
+        "restoredScenariosCount": 0,
+        "minutesRecovered": 2.9,
+        "profilesHelpedCount": 1,
+        "rank": 1
+      },
+      {
+        "barrierId": "barrier_dining_repair",
+        "barrierKind": "obstruction",
+        "edgeId": "edge_water_dining",
+        "note": "Paving stone resurfacing along Dining Commons terrace. Uneven passage, cautious transit advised.",
+        "severity": 2,
+        "restoredScenariosCount": 0,
+        "minutesRecovered": 0,
+        "profilesHelpedCount": 0,
+        "rank": 2
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "scen_lib_to_lab_wheelchair",
+      "name": "Library Entrance → Science Lab (Step-free)",
+      "profileId": "step_free",
+      "originId": "node_lib_entrance",
+      "destinationId": "node_sci_lab",
+      "fastestSec": 350,
+      "fastestMinutes": 5.8,
+      "accessibleSec": 450,
+      "accessibleMinutes": 7.5,
+      "penaltyRatio": 1.29,
+      "connected": true,
+      "status": "Accessible Detour",
+      "edgesTraversed": [
+        "edge_lib_courtyard",
+        "edge_courtyard_ramp_f2",
+        "edge_ramplanding_liftf2",
+        "edge_liftf2_stairstop",
+        "edge_stairstop_scilab"
+      ]
+    },
+    {
+      "id": "scen_gate_to_lab_wheelchair",
+      "name": "Main Campus Gate → Science Lab (Step-free)",
+      "profileId": "step_free",
+      "originId": "node_gate",
+      "destinationId": "node_sci_lab",
+      "fastestSec": 425,
+      "fastestMinutes": 7.1,
+      "accessibleSec": 525,
+      "accessibleMinutes": 8.8,
+      "penaltyRatio": 1.24,
+      "connected": true,
+      "status": "Accessible Detour",
+      "edgesTraversed": [
+        "edge_gate_admin",
+        "edge_admin_courtyard",
+        "edge_courtyard_ramp_f2",
+        "edge_ramplanding_liftf2",
+        "edge_liftf2_stairstop",
+        "edge_stairstop_scilab"
+      ]
+    },
+    {
+      "id": "scen_admin_to_lab_wheelchair",
+      "name": "Administration → Science Lab (Step-free)",
+      "profileId": "step_free",
+      "originId": "node_admin",
+      "destinationId": "node_sci_lab",
+      "fastestSec": 340,
+      "fastestMinutes": 5.7,
+      "accessibleSec": 440,
+      "accessibleMinutes": 7.3,
+      "penaltyRatio": 1.29,
+      "connected": true,
+      "status": "Accessible Detour",
+      "edgesTraversed": [
+        "edge_admin_courtyard",
+        "edge_courtyard_ramp_f2",
+        "edge_ramplanding_liftf2",
+        "edge_liftf2_stairstop",
+        "edge_stairstop_scilab"
+      ]
+    },
+    {
+      "id": "scen_humanities_to_lab_wheelchair",
+      "name": "Humanities Annex → Science Lab (Step-free)",
+      "profileId": "step_free",
+      "originId": "node_humanities",
+      "destinationId": "node_sci_lab",
+      "fastestSec": 435,
+      "fastestMinutes": 7.3,
+      "accessibleSec": 535,
+      "accessibleMinutes": 8.9,
+      "penaltyRatio": 1.23,
+      "connected": true,
+      "status": "Accessible Detour",
+      "edgesTraversed": [
+        "edge_humanities_lib",
+        "edge_lib_courtyard",
+        "edge_courtyard_ramp_f2",
+        "edge_ramplanding_liftf2",
+        "edge_liftf2_stairstop",
+        "edge_stairstop_scilab"
+      ]
+    },
+    {
+      "id": "scen_gate_to_lib_low_vision",
+      "name": "Main Campus Gate → Library (Low Vision)",
+      "profileId": "low_vision",
+      "originId": "node_gate",
+      "destinationId": "node_lib_entrance",
+      "fastestSec": 195,
+      "fastestMinutes": 3.3,
+      "accessibleSec": 285,
+      "accessibleMinutes": 4.8,
+      "penaltyRatio": 1.46,
+      "connected": true,
+      "status": "Accessible Detour",
+      "edgesTraversed": [
+        "edge_gate_admin",
+        "edge_admin_courtyard",
+        "edge_lib_courtyard"
+      ]
+    },
+    {
+      "id": "scen_courtyard_to_dining_shade",
+      "name": "Central Plaza → Dining Commons (Shade & Rest)",
+      "profileId": "shade_rest",
+      "originId": "node_courtyard",
+      "destinationId": "node_dining",
+      "fastestSec": 115,
+      "fastestMinutes": 1.9,
+      "accessibleSec": 115,
+      "accessibleMinutes": 1.9,
+      "penaltyRatio": 1,
+      "connected": true,
+      "status": "Direct / Optimal",
+      "edgesTraversed": [
+        "edge_courtyard_water",
+        "edge_water_dining"
+      ]
+    },
+    {
+      "id": "scen_gate_to_sci_low_sensory",
+      "name": "Main Campus Gate → Science Foyer (Low Sensory)",
+      "profileId": "low_sensory",
+      "originId": "node_gate",
+      "destinationId": "node_sci_foyer",
+      "fastestSec": 340,
+      "fastestMinutes": 5.7,
+      "accessibleSec": 340,
+      "accessibleMinutes": 5.7,
+      "penaltyRatio": 1,
+      "connected": true,
+      "status": "Direct / Optimal",
+      "edgesTraversed": [
+        "edge_gate_admin",
+        "edge_admin_courtyard",
+        "edge_courtyard_sciquad",
+        "edge_sciquad_scifoyer"
+      ]
+    },
+    {
+      "id": "scen_dining_to_lab_step_free",
+      "name": "Dining Commons → Science Lab (Step-free)",
+      "profileId": "step_free",
+      "originId": "node_dining",
+      "destinationId": "node_sci_lab",
+      "fastestSec": 360,
+      "fastestMinutes": 6,
+      "accessibleSec": 460,
+      "accessibleMinutes": 7.7,
+      "penaltyRatio": 1.28,
+      "connected": true,
+      "status": "Accessible Detour",
+      "edgesTraversed": [
+        "edge_water_dining",
+        "edge_courtyard_water",
+        "edge_courtyard_ramp_f2",
+        "edge_ramplanding_liftf2",
+        "edge_liftf2_stairstop",
+        "edge_stairstop_scilab"
+      ]
+    }
+  ]
+}

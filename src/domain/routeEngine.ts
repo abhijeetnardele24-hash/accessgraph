@@ -9,7 +9,11 @@ import {
   FastestRouteBaseline,
   RejectedEdgeProof,
 } from "./types";
-import { checkEdgeHardConstraints, getActiveHardConstraintDescriptions } from "./constraints";
+import {
+  checkEdgeHardConstraints,
+  getActiveHardConstraintDescriptions,
+  filterActiveBarriers,
+} from "./constraints";
 
 /**
  * Calculates normalized multi-objective soft cost for traversing an edge.
@@ -86,6 +90,7 @@ interface PathState {
   totalDistanceM: number;
   edges: CampusEdge[];
   nodes: string[];
+  pathKey: string;
 }
 
 /**
@@ -95,15 +100,18 @@ interface PathState {
  *   1. Total Cost
  *   2. Total Duration
  *   3. Total Distance
- *   4. Lexicographic edge IDs
+ *   4. Lexicographic edge IDs pathKey
  */
 export function findRoute(
   dataset: CampusDataset,
   originId: string,
   destinationId: string,
   profile: RouteProfile,
-  activeBarriers: Barrier[]
+  activeBarriers: Barrier[],
+  evaluationTime: Date = new Date()
 ): RouteResult {
+  const effectiveBarriers = filterActiveBarriers(activeBarriers, evaluationTime);
+
   const nodeMap = new Map<string, CampusNode>();
   for (const n of dataset.nodes) {
     nodeMap.set(n.id, n);
@@ -114,7 +122,7 @@ export function findRoute(
   const eligibleEdges: CampusEdge[] = [];
 
   for (const edge of dataset.edges) {
-    const check = checkEdgeHardConstraints(edge, profile, activeBarriers);
+    const check = checkEdgeHardConstraints(edge, profile, effectiveBarriers, evaluationTime);
     if (check.eligible) {
       eligibleEdges.push(edge);
     } else {
@@ -147,6 +155,7 @@ export function findRoute(
   const bestCost = new Map<string, number>();
   const bestDuration = new Map<string, number>();
   const bestDistance = new Map<string, number>();
+  const bestPathKey = new Map<string, string>();
 
   const openSet: PathState[] = [
     {
@@ -156,17 +165,19 @@ export function findRoute(
       totalDistanceM: 0,
       edges: [],
       nodes: [originId],
+      pathKey: "",
     },
   ];
 
   bestCost.set(originId, 0);
   bestDuration.set(originId, 0);
   bestDistance.set(originId, 0);
+  bestPathKey.set(originId, "");
 
   let targetState: PathState | null = null;
 
   while (openSet.length > 0) {
-    // Sort deterministically
+    // Sort deterministically: cost -> duration -> distance -> pathKey
     openSet.sort((a, b) => {
       if (Math.abs(a.totalCost - b.totalCost) > 0.0001) {
         return a.totalCost - b.totalCost;
@@ -177,7 +188,7 @@ export function findRoute(
       if (a.totalDistanceM !== b.totalDistanceM) {
         return a.totalDistanceM - b.totalDistanceM;
       }
-      return a.nodeId.localeCompare(b.nodeId);
+      return a.pathKey.localeCompare(b.pathKey);
     });
 
     const current = openSet.shift()!;
@@ -202,11 +213,13 @@ export function findRoute(
       const { totalCost: edgeCost } = calculateEdgeCost(
         edge,
         profile,
-        activeBarriers
+        effectiveBarriers
       );
       const nextCost = current.totalCost + edgeCost;
       const nextDuration = current.totalDurationSec + edge.durationSec;
       const nextDistance = current.totalDistanceM + edge.distanceM;
+      const nextEdges = [...current.edges, edge];
+      const nextKey = nextEdges.map((e) => e.id).join("->");
 
       const prevBestCost = bestCost.get(neighborId);
 
@@ -223,6 +236,11 @@ export function findRoute(
           const prevDistance = bestDistance.get(neighborId) || Infinity;
           if (nextDistance < prevDistance) {
             isBetter = true;
+          } else if (nextDistance === prevDistance) {
+            const prevKey = bestPathKey.get(neighborId) || "";
+            if (nextKey.localeCompare(prevKey) < 0) {
+              isBetter = true;
+            }
           }
         }
       }
@@ -231,14 +249,16 @@ export function findRoute(
         bestCost.set(neighborId, nextCost);
         bestDuration.set(neighborId, nextDuration);
         bestDistance.set(neighborId, nextDistance);
+        bestPathKey.set(neighborId, nextKey);
 
         openSet.push({
           nodeId: neighborId,
           totalCost: nextCost,
           totalDurationSec: nextDuration,
           totalDistanceM: nextDistance,
-          edges: [...current.edges, edge],
+          edges: nextEdges,
           nodes: [...current.nodes, neighborId],
+          pathKey: nextKey,
         });
       }
     }
@@ -255,7 +275,7 @@ export function findRoute(
 
   if (!targetState) {
     // Collect diagnostic information on why no route was found
-    const blockingBarriers = activeBarriers.filter((b) => b.hardBlock);
+    const blockingBarriers = effectiveBarriers.filter((b) => b.hardBlock);
     const failedConstraints = Array.from(
       new Set(rejectedEdges.map((r) => r.constraint))
     );
@@ -316,7 +336,7 @@ export function findRoute(
     const { breakdown: edgeBreakdown } = calculateEdgeCost(
       edge,
       profile,
-      activeBarriers
+      effectiveBarriers
     );
     breakdown.timeCost += edgeBreakdown.timeCost;
     breakdown.slopeCost += edgeBreakdown.slopeCost;
@@ -334,7 +354,7 @@ export function findRoute(
     fastestBaseline,
     profile,
     rejectedEdges,
-    activeBarriers
+    effectiveBarriers
   );
 
   return {
@@ -358,6 +378,7 @@ export function findRoute(
 
 /**
  * Computes shortest unconstrained route by raw travel time (ignoring profile hard constraints).
+ * Fully deterministic with tie-breaking on duration, distance, and pathKey.
  */
 export function computeFastestBaseline(
   dataset: CampusDataset,
@@ -377,7 +398,12 @@ export function computeFastestBaseline(
   }
 
   const bestDuration = new Map<string, number>();
+  const bestDistance = new Map<string, number>();
+  const bestPathKey = new Map<string, string>();
+
   bestDuration.set(originId, 0);
+  bestDistance.set(originId, 0);
+  bestPathKey.set(originId, "");
 
   const queue: Array<{
     nodeId: string;
@@ -385,6 +411,7 @@ export function computeFastestBaseline(
     distance: number;
     edges: CampusEdge[];
     nodes: string[];
+    pathKey: string;
   }> = [
     {
       nodeId: originId,
@@ -392,6 +419,7 @@ export function computeFastestBaseline(
       distance: 0,
       edges: [],
       nodes: [originId],
+      pathKey: "",
     },
   ];
 
@@ -400,10 +428,15 @@ export function computeFastestBaseline(
     distance: number;
     edges: CampusEdge[];
     nodes: string[];
+    pathKey: string;
   } | null = null;
 
   while (queue.length > 0) {
-    queue.sort((a, b) => a.duration - b.duration);
+    queue.sort((a, b) => {
+      if (a.duration !== b.duration) return a.duration - b.duration;
+      if (a.distance !== b.distance) return a.distance - b.distance;
+      return a.pathKey.localeCompare(b.pathKey);
+    });
     const curr = queue.shift()!;
 
     if (curr.nodeId === destinationId) {
@@ -411,7 +444,8 @@ export function computeFastestBaseline(
       break;
     }
 
-    if (curr.duration > (bestDuration.get(curr.nodeId) || Infinity)) {
+    const currBest = bestDuration.get(curr.nodeId);
+    if (currBest !== undefined && curr.duration > currBest) {
       continue;
     }
 
@@ -419,14 +453,38 @@ export function computeFastestBaseline(
     for (const { neighborId, edge } of neighbors) {
       if (curr.nodes.includes(neighborId)) continue;
       const nextDur = curr.duration + edge.durationSec;
-      if (nextDur < (bestDuration.get(neighborId) || Infinity)) {
+      const nextDist = curr.distance + edge.distanceM;
+      const nextEdges = [...curr.edges, edge];
+      const nextKey = nextEdges.map((e) => e.id).join("->");
+
+      const prevDur = bestDuration.get(neighborId);
+      let isBetter = false;
+
+      if (prevDur === undefined || nextDur < prevDur) {
+        isBetter = true;
+      } else if (nextDur === prevDur) {
+        const prevDist = bestDistance.get(neighborId) || Infinity;
+        if (nextDist < prevDist) {
+          isBetter = true;
+        } else if (nextDist === prevDist) {
+          const prevKey = bestPathKey.get(neighborId) || "";
+          if (nextKey.localeCompare(prevKey) < 0) {
+            isBetter = true;
+          }
+        }
+      }
+
+      if (isBetter) {
         bestDuration.set(neighborId, nextDur);
+        bestDistance.set(neighborId, nextDist);
+        bestPathKey.set(neighborId, nextKey);
         queue.push({
           nodeId: neighborId,
           duration: nextDur,
-          distance: curr.distance + edge.distanceM,
-          edges: [...curr.edges, edge],
+          distance: nextDist,
+          edges: nextEdges,
           nodes: [...curr.nodes, neighborId],
+          pathKey: nextKey,
         });
       }
     }

@@ -34,45 +34,43 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;
-  const url = new URL(req.url);
 
-  // Only handle same-origin or GET requests
+  // Only handle same-origin GET requests
   if (req.method !== "GET") return;
 
   // Navigation request (e.g., page reload offline)
   if (req.mode === "navigate") {
     event.respondWith(
       fetch(req).catch(async () => {
-        const cached = await caches.match("./index.html", { ignoreSearch: true });
-        if (cached) return cached;
-        return caches.match("./", { ignoreSearch: true });
+        const cachedIndex = await caches.match("./index.html", { ignoreSearch: true });
+        if (cachedIndex) return cachedIndex;
+        const cachedRoot = await caches.match("./", { ignoreSearch: true });
+        if (cachedRoot) return cachedRoot;
+        return caches.match(req, { ignoreSearch: true });
       })
     );
     return;
   }
 
-  // Static assets: Cache-first with background network revalidation
+  // Static assets: Cache-first
   event.respondWith(
     caches.match(req, { ignoreSearch: true }).then((cachedResponse) => {
       if (cachedResponse) {
-        // Fetch fresh copy in background if online
-        fetch(req)
-          .then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              caches.open(CACHE_NAME).then((cache) => cache.put(req, networkResponse));
-            }
-          })
-          .catch(() => {});
         return cachedResponse;
       }
 
-      return fetch(req).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, responseToCache));
-        }
-        return networkResponse;
-      });
+      return fetch(req)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, responseToCache));
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          // If offline and not in cache
+          return caches.match(req, { ignoreSearch: true });
+        });
     })
   );
 });

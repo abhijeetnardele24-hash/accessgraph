@@ -8,17 +8,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: "pages"
+  group: "deployment"
   cancel-in-progress: false
 
 jobs:
   verify:
-    name: Build, Typecheck, Unit Tests & E2E Audits
+    name: Build, Typecheck, Lint, Tests, Security & E2E Audits
     runs-on: ubuntu-latest
 
     steps:
@@ -27,10 +25,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: "npm"
 
       - name: Install Dependencies
@@ -39,49 +37,51 @@ jobs:
       - name: TypeScript Static Typecheck
         run: npm run typecheck
 
-      - name: Vitest Unit Coverage
+      - name: ESLint Code Quality
+        run: npm run lint
+
+      - name: Vitest Unit & Component Coverage
         run: npm test
 
       - name: Production Vite Build
         run: npm run build
 
-      - name: Secret & Credential Scan
+      - name: Secret & Credential History Scan
         run: npm run security-scan
+
+      - name: Dependency Security Audit
+        run: npm run audit
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Playwright E2E & Axe Accessibility Audits
+      - name: Playwright E2E & Axe Accessibility Audits (45 executions)
         run: npm run test:e2e
 
   deploy:
-    name: Deploy to GitHub Pages
+    name: Deploy Production Bundle to gh-pages
     needs: verify
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: "npm"
 
-      - name: Install & Build
+      - name: Install & Build Production Artifacts
         run: |
           npm ci
           npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to gh-pages Branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: './dist'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4

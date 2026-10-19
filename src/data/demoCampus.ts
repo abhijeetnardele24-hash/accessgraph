@@ -1,8 +1,8 @@
 import { CampusDataset } from "../domain/types";
 
 export const DEMO_CAMPUS: CampusDataset = {
-  id: "synthetic-ashoka-campus",
-  name: "Ashoka Community Campus (Synthetic Demonstration)",
+  id: "synthetic-demo-campus",
+  name: "Synthetic Demo Campus (Evaluation Fixture)",
   version: "1.0.0",
   isSyntheticDemo: true,
   attribution: "Synthetic benchmark dataset designed for EurekaDev 2026 accessibility audit & routing.",

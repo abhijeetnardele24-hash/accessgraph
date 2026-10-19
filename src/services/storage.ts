@@ -1,4 +1,4 @@
-import { Barrier } from "../domain/types";
+import { Barrier, RouteProfile } from "../domain/types";
 import { DEMO_CAMPUS } from "../data/demoCampus";
 
 const BARRIERS_STORAGE_KEY = "accessgraph_active_barriers_v1";
@@ -49,6 +49,47 @@ export function saveStoredProfileId(profileId: string): void {
     localStorage.setItem(PROFILE_STORAGE_KEY, profileId);
   } catch {
     // Ignore storage quota errors
+  }
+}
+
+const CUSTOM_PROFILE_STORAGE_KEY = "accessgraph_custom_profile_v1";
+
+/**
+ * Loads stored custom profile, or null if none saved.
+ */
+export function loadStoredCustomProfile(): RouteProfile | null {
+  try {
+    const raw = localStorage.getItem(CUSTOM_PROFILE_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object" && parsed.id === "custom") {
+      return parsed as RouteProfile;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Saves custom profile locally.
+ */
+export function saveStoredCustomProfile(profile: RouteProfile): void {
+  try {
+    localStorage.setItem(CUSTOM_PROFILE_STORAGE_KEY, JSON.stringify(profile));
+  } catch {
+    // Ignore storage quota errors
+  }
+}
+
+/**
+ * Clears custom profile from local storage.
+ */
+export function clearStoredCustomProfile(): void {
+  try {
+    localStorage.removeItem(CUSTOM_PROFILE_STORAGE_KEY);
+  } catch {
+    // Ignore
   }
 }
 

@@ -20,18 +20,56 @@ export const AddBarrierModal: React.FC<AddBarrierModalProps> = ({
   const [kind, setKind] = useState<BarrierKind>("lift_outage");
   const [hardBlock, setHardBlock] = useState(true);
   const [severity, setSeverity] = useState<1 | 2 | 3>(3);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
-      closeButtonRef.current?.focus();
+      openerRef.current = document.activeElement as HTMLElement | null;
+      setTimeout(() => {
+        closeButtonRef.current?.focus();
+      }, 50);
+
       const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === "Escape") onClose();
+        if (e.key === "Escape") {
+          e.preventDefault();
+          onClose();
+          return;
+        }
+
+        if (e.key === "Tab" && dialogRef.current) {
+          const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          if (focusable.length === 0) return;
+
+          const firstElem = focusable[0];
+          const lastElem = focusable[focusable.length - 1];
+
+          if (e.shiftKey) {
+            if (document.activeElement === firstElem) {
+              e.preventDefault();
+              lastElem.focus();
+            }
+          } else {
+            if (document.activeElement === lastElem) {
+              e.preventDefault();
+              firstElem.focus();
+            }
+          }
+        }
       };
+
       window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+        if (openerRef.current && typeof openerRef.current.focus === "function") {
+          openerRef.current.focus();
+        }
+      };
     }
   }, [isOpen, onClose]);
 
@@ -39,7 +77,14 @@ export const AddBarrierModal: React.FC<AddBarrierModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!note.trim() || !edgeId) return;
+    if (!note.trim()) {
+      setValidationError("Incident description / note is required.");
+      return;
+    }
+    if (!edgeId) {
+      setValidationError("Please select an affected campus path.");
+      return;
+    }
 
     const newBarrier: Barrier = {
       id: `barrier_${Date.now()}`,
@@ -54,6 +99,7 @@ export const AddBarrierModal: React.FC<AddBarrierModalProps> = ({
 
     onAddBarrier(newBarrier);
     setNote("");
+    setValidationError(null);
     onClose();
   };
 
@@ -86,6 +132,12 @@ export const AddBarrierModal: React.FC<AddBarrierModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
+          {validationError && (
+            <div className="form-error-banner" role="alert">
+              <AlertTriangle size={16} aria-hidden="true" />
+              <span>{validationError}</span>
+            </div>
+          )}
           <div className="form-group">
             <label htmlFor="barrier-edge" className="form-label">
               Affected Campus Path / Segment <span className="text-amber">*</span>

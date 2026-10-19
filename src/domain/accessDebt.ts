@@ -7,6 +7,7 @@ import {
 } from "./types";
 import { ROUTE_PROFILES } from "./profiles";
 import { findRoute, computeFastestBaseline } from "./routeEngine";
+import { filterActiveBarriers } from "./constraints";
 import { BENCHMARK_SCENARIOS } from "../data/scenarios";
 
 /**
@@ -26,8 +27,10 @@ import { BENCHMARK_SCENARIOS } from "../data/scenarios";
  */
 export function evaluateAccessDebt(
   dataset: CampusDataset,
-  activeBarriers: Barrier[]
+  activeBarriers: Barrier[],
+  evaluationTime: Date = new Date()
 ): AccessDebtReport {
+  const effectiveBarriers = filterActiveBarriers(activeBarriers, evaluationTime);
   const scenarioResults: ScenarioResult[] = [];
   let disconnectedCount = 0;
   let penaltySum = 0;
@@ -40,7 +43,8 @@ export function evaluateAccessDebt(
       scen.originId,
       scen.destinationId,
       profile,
-      activeBarriers
+      effectiveBarriers,
+      evaluationTime
     );
 
     const fastest =
@@ -83,8 +87,8 @@ export function evaluateAccessDebt(
   // Evaluate each active barrier as a repair candidate
   const repairCandidates: RepairCandidate[] = [];
 
-  for (const barrier of activeBarriers) {
-    const barriersWithoutThis = activeBarriers.filter((b) => b.id !== barrier.id);
+  for (const barrier of effectiveBarriers) {
+    const barriersWithoutThis = effectiveBarriers.filter((b) => b.id !== barrier.id);
 
     let restoredScenariosCount = 0;
     let secondsRecovered = 0;
@@ -99,7 +103,8 @@ export function evaluateAccessDebt(
         scen.originId,
         scen.destinationId,
         profile,
-        barriersWithoutThis
+        barriersWithoutThis,
+        evaluationTime
       );
 
       if (currentRes && !currentRes.connected && simRes.found) {
@@ -154,11 +159,11 @@ export function evaluateAccessDebt(
   });
 
   return {
-    timestamp: new Date().toISOString(),
+    timestamp: evaluationTime.toISOString(),
     totalScenariosEvaluated: BENCHMARK_SCENARIOS.length,
     disconnectedScenariosCount: disconnectedCount,
     averageAccessPenalty,
-    activeBarriersCount: activeBarriers.length,
+    activeBarriersCount: effectiveBarriers.length,
     repairCandidates,
     scenarioResults,
   };

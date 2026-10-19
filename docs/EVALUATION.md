@@ -2,89 +2,109 @@
 
 > **Empirical Quality & Benchmark Audit**  
 > **Evaluation Date:** 19 October 2026  
-> **Target Event:** EurekaDev 2026  
-> **Test Status:** 27 Unit Tests (100% Pass, 95.8% Stmts) • 15 E2E Viewport Tests (100% Pass) • 0 Axe WCAG Violations
+> **Target Event:** EurekaDev 2026 (Coding Track / Problem in the Community)  
+> **Verification Status:** 36 Unit/Component Tests (100% Pass, 94.07% Stmts) • 9 Distinct E2E Test Definitions across 5 Viewports (45 Total Executions, 100% Pass) • 0 Axe WCAG 2.2 AA Violations
 
 ---
 
 ## 1. Executive Summary
 
 AccessGraph was evaluated against three rigorous criteria:
-1. **Mathematical Determinism & Constraint Adherence:** Verifying that route calculation strictly honors hard safety limits and generates identical paths across repeated invocations.
-2. **Access Debt Efficacy:** Demonstrating that the system correctly pinpoints high-impact physical bottlenecks and ranks capital repair candidates to maximize network-wide accessibility.
-3. **Execution Performance & Robustness:** Ensuring instantaneous client-side calculation (<15ms for full audit suite) and 100% offline functionality.
+1. **Mathematical Determinism & Constraint Adherence:** Verifying that route calculation strictly honors hard safety limits (zero stairs on step-free, maximum slope thresholds, clear path width, barrier evaluation time windows) and generates identical paths across repeated invocations and randomized edge ordering.
+2. **Access Debt Efficacy:** Demonstrating that the system correctly pinpoints high-impact physical bottlenecks and ranks capital repair candidates to maximize network-wide accessibility and travel time recovery.
+3. **Execution Performance & Robustness:** Providing client-side calculation (median single-route latency of 0.023ms; median 8-scenario audit latency of 0.731ms) and 100% offline functionality via Service Worker caching.
 
 ---
 
-## 2. Signature Demonstration Benchmark
+## 2. Theoretical Grounding & Primary Standards
+
+AccessGraph grounds its multi-objective routing and Access Debt metrics in authoritative international accessibility standards:
+- **World Health Organization (WHO):** *World Report on Disability* (2011) documents physical infrastructure and transit disparities as compounding systemic barriers to higher education and civic life.
+- **UNICEF:** *Accessible and Inclusive Infrastructure Guidelines* (2019) emphasizes the necessity of step-free paths, maximum 6% ramp inclinations, tactile paving guidance, and multi-modal sensory accommodation.
+- **OpenStreetMap (OSM) Accessibility Attributes:** Graph edges model standardized properties (`incline`, `surface`, `tactile_paving`, `kerb`, `wheelchair`, `lit`, `indoor`).
+- **W3C WCAG 2.2 Level AA:** UI interfaces comply with strict contrast thresholds, 44×44px interactive touch targets, visible focus indicators, and accessible dialog focus traps.
+
+---
+
+## 3. Signature Demonstration Benchmark
 
 The signature journey evaluates wayfinding between **Library Entrance** (`node_lib_entrance`) and **Science Advanced Chemistry Lab** (`node_sci_lab`, 2nd Floor).
 
 | Test Stage | User Profile | Active Barriers | Selected Pathway | Distance | Duration | Outcome & Verification |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Stage 1: Able-Bodied Baseline** | Fastest / Unconstrained | None | Library $\rightarrow$ Atrium Stairs $\rightarrow$ Mezzanine $\rightarrow$ Lab | 455 m | 350 s | Directly uses stairs (`edge_sci_stairs_flight`). Matches optimal fastest baseline. |
-| **Stage 2: Accessible Baseline** | Step-Free (Wheelchair / Stroller) | None | Library $\rightarrow$ Ground Foyer $\rightarrow$ Passenger Lift $\rightarrow$ Lab | 480 m | 365 s | Stairs rejected by hard constraint. Routes via elevator (`edge_sci_lift_shaft`). Adds 15s. |
-| **Stage 3: Outage Detour** | Step-Free (Wheelchair / Stroller) | Lift Outage (`barrier_lift_outage`) | Library $\rightarrow$ Central Courtyard $\rightarrow$ Covered Ramp $\rightarrow$ Lab | 550 m | 420 s | Elevator rejected due to outage. Deterministically reroutes via covered courtyard ramp bridge (`edge_courtyard_ramp_bridge`). |
-| **Stage 4: Capital Prioritization** | Institutional Audit | Lift Outage + Dining Surface Work | Access Debt Engine | — | — | Ranks Lift Outage as **#1 Priority**: recovers 2.9 minutes per transit trip and eliminates isolated routes. |
+| **Stage 1: Able-Bodied Baseline** | Fastest / Unconstrained | None | Library $\rightarrow$ Atrium Stairs $\rightarrow$ Mezzanine $\rightarrow$ Lab | 455 m | 350 s (5m 50s) | Directly uses stairs (`edge_sci_stairs_flight`). Matches optimal fastest baseline. |
+| **Stage 2: Accessible Baseline** | Step-Free (Wheelchair / Stroller) | None | Library $\rightarrow$ Ground Foyer $\rightarrow$ Passenger Lift $\rightarrow$ Lab | 480 m | 365 s (6m 05s) | Stairs rejected by hard constraint. Routes via elevator (`edge_sci_lift_shaft`). Adds 15s. |
+| **Stage 3: Outage Detour** | Step-Free (Wheelchair / Stroller) | Lift Outage (`barrier_lift_outage`) | Library $\rightarrow$ Central Courtyard $\rightarrow$ Covered Ramp $\rightarrow$ Lab | 570 m | 450 s (7m 30s) | Elevator rejected due to outage. Deterministically reroutes via covered courtyard ramp (`edge_courtyard_ramp_f2`). |
+| **Stage 4: Capital Prioritization** | Institutional Audit | Lift Outage + Dining Surface Work | Access Debt Engine | — | — | Ranks Lift Outage as **#1 Priority**: recovers 2.9 minutes per transit trip and eliminates mobility bottleneck. |
 
 ---
 
-## 3. Benchmark Scenarios Suite
+## 4. Benchmark Scenarios Suite (Synthetic Demo Campus)
 
-AccessGraph evaluates campus equity against 8 calibrated benchmark routes representing diverse daily transit patterns:
+AccessGraph evaluates campus equity against 8 benchmark routes representing diverse daily transit patterns across a synthetic campus fixture (`docs/evaluation-results.json`):
 
-| ID | Origin $\rightarrow$ Destination | Profile Preset | Base Time | Accessible Time | Penalty Ratio | Status |
+| Scenario ID | Origin $\rightarrow$ Destination | Profile Preset | Fastest Base | Accessible Time | Penalty Ratio | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `sc_gate_to_sci` | Gate $\rightarrow$ Science Foyer | `fastest` | 3.5 min | 3.5 min | **1.00×** | Direct / Optimal |
-| `sc_gate_to_lib` | Gate $\rightarrow$ Library Entrance | `step_free` | 2.5 min | 2.5 min | **1.00×** | Direct / Accessible |
-| `sc_lib_to_lab` | Library $\rightarrow$ Science Chemistry Lab | `step_free` | 5.8 min | 7.0 min | **1.21×** | Detoured via Ramp |
-| `sc_dining_to_grove` | Dining Commons $\rightarrow$ Tree Grove | `shade_rest` | 3.2 min | 3.6 min | **1.13×** | Shaded Detour |
-| `sc_annex_to_water` | Humanities Annex $\rightarrow$ Hydration Station | `low_vision` | 4.0 min | 4.0 min | **1.00×** | Tactile Guidance Path |
-| `sc_gate_to_dining` | Gate $\rightarrow$ Dining Commons | `low_sensory` | 4.8 min | 5.4 min | **1.12×** | Calm Courtyard Path |
-| `sc_admin_to_lab` | Admin Building $\rightarrow$ Science Chemistry Lab | `step_free` | 6.2 min | 7.6 min | **1.23×** | Detoured via Ramp |
-| `sc_plaza_to_sci` | Central Plaza $\rightarrow$ Science Quad | `fastest` | 1.8 min | 1.8 min | **1.00×** | Direct / Optimal |
+| `scen_lib_to_lab_wheelchair` | Library Entrance $\rightarrow$ Science Lab | `step_free` | 5.8 min | 7.5 min | **1.29×** | Accessible Detour |
+| `scen_gate_to_lab_wheelchair` | Main Campus Gate $\rightarrow$ Science Lab | `step_free` | 7.1 min | 8.8 min | **1.24×** | Accessible Detour |
+| `scen_admin_to_lab_wheelchair` | Administration $\rightarrow$ Science Lab | `step_free` | 5.7 min | 7.3 min | **1.29×** | Accessible Detour |
+| `scen_humanities_to_lab_wheelchair` | Humanities Annex $\rightarrow$ Science Lab | `step_free` | 7.3 min | 8.9 min | **1.23×** | Accessible Detour |
+| `scen_gate_to_lib_low_vision` | Main Campus Gate $\rightarrow$ Library | `low_vision` | 3.3 min | 4.8 min | **1.46×** | Accessible Detour |
+| `scen_courtyard_to_dining_shade` | Central Plaza $\rightarrow$ Dining Commons | `shade_rest` | 1.9 min | 1.9 min | **1.00×** | Direct / Optimal |
+| `scen_gate_to_sci_low_sensory` | Main Campus Gate $\rightarrow$ Science Foyer | `low_sensory` | 5.7 min | 5.7 min | **1.00×** | Direct / Optimal |
+| `scen_dining_to_lab_step_free` | Dining Commons $\rightarrow$ Science Lab | `step_free` | 6.0 min | 7.7 min | **1.28×** | Accessible Detour |
+
+### Summary Statistics
+- **Total Scenarios Evaluated:** 8
+- **Disconnected Routes:** 0 (all benchmark routes have feasible paths under default synthetic fixture)
+- **Average Access Penalty:** **1.22×** (accessible duration vs fastest baseline across connected scenarios)
+- **Active Outages in Default Fixture:** 2 (`barrier_lift_outage`, `barrier_dining_repair`)
+- **Top Repair Candidate:** `barrier_lift_outage` (Rank 1, +2.9 min recovered for Step-Free profile)
 
 ---
 
-## 4. Performance & Resource Footprint
+## 5. Reproducible Performance Benchmark Metrics
 
-Measurements conducted on standard consumer hardware (Apple M-series & Intel i7):
+Metrics measured via committed benchmark harness (`scripts/run-benchmarks.ts`), saved to `docs/benchmark-metrics.json`:
 
-| Benchmark Operation | Sample Size | Average Latency | Peak Memory | Network Requests |
-| :--- | :--- | :--- | :--- | :--- |
-| Single-trip `findRoute` Dijkstra | 1,000 iterations | **0.84 ms** | < 2 MB | **0** (100% Client-Side) |
-| Complete `evaluateAccessDebt` (24 Dijkstra runs) | 500 iterations | **7.12 ms** | < 4 MB | **0** (100% Client-Side) |
-| Cold application initial load (Vite preview) | 20 runs | **124 ms** | 18 MB | Static asset bundle only |
-| Offline reload under Service Worker | 20 runs | **86 ms** | 16 MB | **0** (Served from cache) |
+| Benchmark Operation | Sample Size | Mean Latency | Median Latency | p95 Latency | Memory & Network |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Single-trip `findRoute` (Dijkstra + soft scoring) | 1,000 iterations | **0.031 ms** | **0.023 ms** | **0.069 ms** | 100% Client-Side, 0 Network requests |
+| Complete `evaluateAccessDebt` (8 scenarios + ranking) | 200 iterations | **0.776 ms** | **0.731 ms** | **1.368 ms** | 100% Client-Side, 0 Network requests |
+
+*Environment: Node.js v24.11.1, Windows x64, 13th Gen Intel Core i5-13420H.*
 
 ---
 
-## 5. Automated Quality Gate Audit
+## 6. Automated Quality Gate Audit
 
-### 5.1 Unit Testing & Code Coverage (Vitest v8)
+### 6.1 Unit & Component Testing (Vitest v8)
 ```
- ✓ src/domain/constraints.test.ts (10 tests)
- ✓ src/domain/routeEngine.test.ts (7 tests)
+ ✓ src/domain/constraints.test.ts (11 tests)
+ ✓ src/domain/routeEngine.test.ts (9 tests)
  ✓ src/domain/accessDebt.test.ts (6 tests)
- ✓ src/components/components.test.tsx (4 tests)
+ ✓ src/components/components.test.tsx (10 tests)
 
  Test Files  4 passed (4)
-      Tests  27 passed (27)
- Statements: 95.82%
- Branches:   89.55%
- Functions:  100.0%
- Lines:      95.82%
+      Tests  36 passed (36)
+ Statements: 94.07%
+ Branches:   84.69%
+ Functions:  97.61%
+ Lines:      94.40%
 ```
 
-### 5.2 Automated Accessibility Audit (`@axe-core/playwright`)
-Tested across 5 standard viewport form factors (Mobile Small 320px, Mobile Standard 390px, Tablet 768px, Desktop HD 1280px, Desktop Large 1920px):
-- **WCAG 2.1 Level AA:** 0 Violations.
-- **WCAG 2.2 Level AA:** 0 Violations.
-- **Contrast Ratios:** All body text $\ge 5.5:1$ (exceeding minimum 4.5:1 threshold).
-- **Interactive Targets:** All buttons and interactive controls maintain minimum $44 \times 44\text{ px}$ target boundaries.
-- **Keyboard Navigation:** Full focus trap management in dialogs, visible skip links on Tab, and aria-current landmark navigation.
+### 6.2 Automated Accessibility & E2E Verification (`@axe-core/playwright`)
+Evaluated across 5 viewport projects (Mobile Small 320px, Mobile Standard 390px, Tablet 768px, Desktop HD 1280px, Desktop Large 1920px):
+- **Distinct Test Definitions:** 9 distinct E2E specifications
+- **Total Executions:** 45 browser test runs
+- **WCAG 2.1 & 2.2 Level AA Violations:** **0 violations** across all 5 states (Default Planner, Step-free, Strict No-Route, Modal Focus Traps, Access Debt Dashboard).
+- **Contrast Ratios:** All body text $\ge 5.5:1$ (exceeding WCAG 4.5:1 threshold).
+- **Interactive Targets:** All buttons maintain minimum $44 \times 44\text{ px}$ target boundaries.
+- **Focus Management:** Full dialog Tab/Shift+Tab cycle, Escape close, and opener focus restoration verified.
+- **Service Worker:** Offline navigation and client-side asset serving verified under simulated network disconnection.
 
-### 5.3 Static Security Scan (`scripts/security-scan.cjs`)
-- Git Commit History: Scanned all commits. **0 secrets found.**
-- Working Tree Files: Scanned 40 tracked files. **0 secrets found.**
-- Production Distribution: Scanned `dist/`. **0 sourcemap leaks, 0 exposed credentials.**
+### 6.3 Security Audit (`scripts/security-scan.cjs` & `npm audit`)
+- **Git Commit History:** Scanned full history. **0 secrets found.**
+- **Working Tree Files:** Scanned all tracked files. **0 secrets found.**
+- **Production Distribution:** Scanned `dist/`. **0 sourcemap leaks, 0 exposed credentials.**
+- **NPM Security Audit:** `npm audit --omit=dev --audit-level=high` reported **0 high/critical vulnerabilities.**

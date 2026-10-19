@@ -9,6 +9,38 @@ export interface ConstraintCheckResult {
 }
 
 /**
+ * Centralized barrier active state evaluator respecting lifecycle timestamps.
+ * - Future startsAt: inactive.
+ * - Past expiresAt: inactive.
+ */
+export function isBarrierActive(barrier: Barrier, evaluationTime: Date = new Date()): boolean {
+  const evalMs = evaluationTime.getTime();
+  if (barrier.startsAt) {
+    const startMs = new Date(barrier.startsAt).getTime();
+    if (!isNaN(startMs) && evalMs < startMs) {
+      return false;
+    }
+  }
+  if (barrier.expiresAt) {
+    const expireMs = new Date(barrier.expiresAt).getTime();
+    if (!isNaN(expireMs) && evalMs >= expireMs) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Filters a barrier collection to only currently active incidents.
+ */
+export function filterActiveBarriers(
+  barriers: Barrier[],
+  evaluationTime: Date = new Date()
+): Barrier[] {
+  return barriers.filter((b) => isBarrierActive(b, evaluationTime));
+}
+
+/**
  * Checks whether an edge satisfies all active hard constraints for a profile
  * and is not blocked by an active hard barrier.
  *
@@ -17,12 +49,14 @@ export interface ConstraintCheckResult {
 export function checkEdgeHardConstraints(
   edge: CampusEdge,
   profile: RouteProfile,
-  activeBarriers: Barrier[]
+  activeBarriers: Barrier[],
+  evaluationTime: Date = new Date()
 ): ConstraintCheckResult {
   const violations: Array<{ constraint: string; reason: string }> = [];
+  const effectiveBarriers = filterActiveBarriers(activeBarriers, evaluationTime);
 
   // 1. Hard Barrier Check
-  const blockingBarriers = activeBarriers.filter(
+  const blockingBarriers = effectiveBarriers.filter(
     (b) => b.edgeId === edge.id && b.hardBlock
   );
   for (const barrier of blockingBarriers) {
@@ -42,7 +76,7 @@ export function checkEdgeHardConstraints(
 
   // 3. Lift Outage Constraint
   if (profile.requireWorkingLift && edge.mode === "lift") {
-    const liftOutages = activeBarriers.filter(
+    const liftOutages = effectiveBarriers.filter(
       (b) => b.edgeId === edge.id && b.kind === "lift_outage"
     );
     if (liftOutages.length > 0) {

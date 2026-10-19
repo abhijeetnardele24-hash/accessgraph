@@ -156,7 +156,7 @@ export const AccessDebtDashboard: React.FC<AccessDebtDashboardProps> = ({
                     </td>
                     <td className="text-right font-mono font-bold text-civic">
                       {repair.minutesRecovered > 0
-                        ? `-${repair.minutesRecovered.toFixed(1)} min`
+                        ? `+${repair.minutesRecovered.toFixed(1)} min`
                         : "0 min"}
                     </td>
                     <td className="text-right font-mono font-bold">
@@ -207,7 +207,7 @@ export const AccessDebtDashboard: React.FC<AccessDebtDashboardProps> = ({
             </thead>
             <tbody>
               {report.scenarioResults.map((sc) => {
-                const isDisconnected = !sc.connected || sc.accessPenalty >= 10.0;
+                const isDisconnected = !sc.connected;
                 return (
                   <tr key={sc.scenarioId} className={isDisconnected ? "disconnected-row" : ""}>
                     <td className="font-mono text-xs">{sc.scenarioId}</td>

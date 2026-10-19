@@ -42,77 +42,34 @@ export const CampusMap: React.FC<CampusMapProps> = ({
     <div
       className="map-canvas-container"
       role="region"
-      aria-label="Interactive Ashoka Campus Wayfinding Map"
+      aria-label="Interactive Synthetic Demo Campus Wayfinding Map"
       tabIndex={0}
-      style={{ width: "100%", height: "100%", minHeight: "450px" }}
     >
       {/* Floating Map Zoom / Reset Controls */}
-      <div
-        style={{
-          position: "absolute",
-          top: "16px",
-          right: "16px",
-          zIndex: 10,
-          display: "flex",
-          flexDirection: "column",
-          gap: "6px",
-          background: "#FFFFFF",
-          padding: "6px",
-          borderRadius: "8px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-          border: "1px solid #DCD8D0",
-        }}
-      >
+      <div className="map-floating-controls">
         <button
           onClick={handleZoomIn}
           title="Zoom Map In"
           aria-label="Zoom Map In"
-          style={{
-            width: "36px",
-            height: "36px",
-            border: "none",
-            background: "transparent",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "4px",
-          }}
+          className="map-control-btn"
         >
-          <ZoomIn size={18} color="#181A1B" />
+          <ZoomIn size={18} aria-hidden="true" />
         </button>
         <button
           onClick={handleZoomOut}
           title="Zoom Map Out"
           aria-label="Zoom Map Out"
-          style={{
-            width: "36px",
-            height: "36px",
-            border: "none",
-            background: "transparent",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "4px",
-          }}
+          className="map-control-btn"
         >
-          <ZoomOut size={18} color="#181A1B" />
+          <ZoomOut size={18} aria-hidden="true" />
         </button>
         <button
           onClick={handleReset}
           title="Reset Map View"
           aria-label="Reset Map View"
-          style={{
-            width: "36px",
-            height: "36px",
-            border: "none",
-            background: "transparent",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "4px",
-          }}
+          className="map-control-btn"
         >
-          <RotateCcw size={16} color="#181A1B" />
+          <RotateCcw size={16} aria-hidden="true" />
         </button>
       </div>
 

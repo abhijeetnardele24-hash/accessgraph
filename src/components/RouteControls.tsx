@@ -1,18 +1,20 @@
-import React from "react";
-import { CampusNode, Barrier } from "../domain/types";
+import React, { useRef } from "react";
+import { CampusNode, Barrier, RouteProfile } from "../domain/types";
 import { ROUTE_PROFILES } from "../domain/profiles";
-import { ArrowUpDown, PlusCircle, RotateCcw } from "lucide-react";
+import { ArrowUpDown, PlusCircle, RotateCcw, Sliders, Check, Shield } from "lucide-react";
 
 interface RouteControlsProps {
   nodes: CampusNode[];
   originId: string;
   destinationId: string;
   selectedProfileId: string;
+  currentProfile: RouteProfile;
   activeBarriers: Barrier[];
   onOriginChange: (id: string) => void;
   onDestinationChange: (id: string) => void;
   onSwapOriginDestination: () => void;
   onProfileSelect: (profileId: string) => void;
+  onOpenCustomProfileModal: () => void;
   onToggleBarrier: (barrierId: string) => void;
   onOpenAddBarrierModal: () => void;
   onResetBarriers: () => void;
@@ -23,16 +25,47 @@ export const RouteControls: React.FC<RouteControlsProps> = ({
   originId,
   destinationId,
   selectedProfileId,
+  currentProfile,
   activeBarriers,
   onOriginChange,
   onDestinationChange,
   onSwapOriginDestination,
   onProfileSelect,
+  onOpenCustomProfileModal,
   onToggleBarrier,
   onOpenAddBarrierModal,
   onResetBarriers,
 }) => {
-  const currentProfile = ROUTE_PROFILES[selectedProfileId] || ROUTE_PROFILES.fastest;
+  const profileList = Object.values(ROUTE_PROFILES);
+  const radiogroupRef = useRef<HTMLDivElement>(null);
+
+  // Keyboard navigation for profile radiogroup
+  const handleKeyDownRadiogroup = (e: React.KeyboardEvent) => {
+    const keys = ["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"];
+    if (!keys.includes(e.key)) return;
+
+    e.preventDefault();
+    const allProfiles = [...profileList];
+    if (currentProfile.isCustom) {
+      allProfiles.push(currentProfile);
+    }
+
+    const currentIdx = allProfiles.findIndex((p) => p.id === selectedProfileId);
+    let nextIdx = currentIdx;
+
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      nextIdx = (currentIdx + 1) % allProfiles.length;
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      nextIdx = (currentIdx - 1 + allProfiles.length) % allProfiles.length;
+    }
+
+    const nextProfile = allProfiles[nextIdx];
+    if (nextProfile) {
+      onProfileSelect(nextProfile.id);
+      const buttons = radiogroupRef.current?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
+      buttons?.[nextIdx]?.focus();
+    }
+  };
 
   return (
     <aside className="control-rail" aria-label="Route Planning Controls">
@@ -42,7 +75,7 @@ export const RouteControls: React.FC<RouteControlsProps> = ({
           Route Terminals
         </h2>
 
-        <div>
+        <div className="terminal-select-group">
           <label htmlFor="select-origin" className="sr-only">
             Starting Location / Origin
           </label>
@@ -58,22 +91,20 @@ export const RouteControls: React.FC<RouteControlsProps> = ({
               </option>
             ))}
           </select>
-        </div>
 
-        <div style={{ display: "flex", justifyContent: "center", margin: "2px 0" }}>
-          <button
-            type="button"
-            className="nav-tab-btn"
-            onClick={onSwapOriginDestination}
-            title="Reverse direction between origin and destination"
-            style={{ minHeight: "36px", padding: "4px 12px" }}
-          >
-            <ArrowUpDown size={15} aria-hidden="true" />
-            <span style={{ fontSize: "12px" }}>Reverse Direction</span>
-          </button>
-        </div>
+          <div className="terminal-reverse-container">
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm reverse-btn"
+              onClick={onSwapOriginDestination}
+              title="Reverse direction between origin and destination"
+              aria-label="Reverse direction between origin and destination"
+            >
+              <ArrowUpDown size={14} aria-hidden="true" />
+              <span>Reverse Direction</span>
+            </button>
+          </div>
 
-        <div>
           <label htmlFor="select-destination" className="sr-only">
             Ending Destination
           </label>
@@ -91,40 +122,24 @@ export const RouteControls: React.FC<RouteControlsProps> = ({
           </select>
         </div>
 
-        {/* Quick presets */}
-        <div style={{ marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "6px" }}>
+        {/* Quick Demo Shortcuts */}
+        <div className="demo-shortcuts-row">
           <button
             type="button"
+            className="demo-shortcut-btn demo-primary"
             onClick={() => {
               onOriginChange("node_lib_entrance");
               onDestinationChange("node_sci_lab");
-            }}
-            style={{
-              fontSize: "11px",
-              padding: "4px 8px",
-              borderRadius: "4px",
-              border: "1px solid var(--border-strong)",
-              background: "#FFFFFF",
-              color: "var(--civic-green)",
-              fontWeight: 600,
             }}
           >
             ★ Demo: Library → Science Lab
           </button>
           <button
             type="button"
+            className="demo-shortcut-btn"
             onClick={() => {
               onOriginChange("node_gate");
               onDestinationChange("node_sci_foyer");
-            }}
-            style={{
-              fontSize: "11px",
-              padding: "4px 8px",
-              borderRadius: "4px",
-              border: "1px solid var(--border-strong)",
-              background: "#FFFFFF",
-              color: "var(--text-secondary)",
-              fontWeight: 500,
             }}
           >
             Gate → Science Foyer
@@ -132,14 +147,32 @@ export const RouteControls: React.FC<RouteControlsProps> = ({
         </div>
       </section>
 
-      {/* Profiles Selection */}
+      {/* Accessibility Profile Selector */}
       <section className="form-group" aria-labelledby="heading-profiles">
-        <h2 id="heading-profiles" className="form-label">
-          Accessibility Profile
-        </h2>
+        <div className="section-title-row">
+          <h2 id="heading-profiles" className="form-label">
+            Accessibility Profile
+          </h2>
+          <button
+            type="button"
+            className="btn btn-outline btn-xs customize-profile-btn"
+            onClick={onOpenCustomProfileModal}
+            title="Open custom profile editor"
+          >
+            <Sliders size={13} aria-hidden="true" />
+            <span>Customize</span>
+          </button>
+        </div>
 
-        <div className="profile-pill-grid" role="radiogroup" aria-labelledby="heading-profiles">
-          {Object.values(ROUTE_PROFILES).map((profile) => {
+        {/* Compact Preset Chips Grid */}
+        <div
+          className="preset-chips-grid"
+          role="radiogroup"
+          aria-labelledby="heading-profiles"
+          ref={radiogroupRef}
+          onKeyDown={handleKeyDownRadiogroup}
+        >
+          {profileList.map((profile) => {
             const isSelected = profile.id === selectedProfileId;
             return (
               <button
@@ -147,89 +180,88 @@ export const RouteControls: React.FC<RouteControlsProps> = ({
                 type="button"
                 role="radio"
                 aria-checked={isSelected}
-                className={`profile-card-btn ${isSelected ? "selected" : ""}`}
+                tabIndex={isSelected ? 0 : -1}
+                className={`preset-chip-btn ${isSelected ? "selected" : ""}`}
                 onClick={() => onProfileSelect(profile.id)}
               >
-                <div className="profile-card-title">
-                  {profile.name}
-                </div>
-                <div className="profile-card-desc">{profile.description}</div>
+                <span className="preset-chip-name">{profile.name}</span>
+                {isSelected && <Check size={12} className="chip-check text-civic" aria-hidden="true" />}
               </button>
             );
           })}
+
+          {currentProfile.isCustom && (
+            <button
+              type="button"
+              role="radio"
+              aria-checked={selectedProfileId === "custom"}
+              tabIndex={selectedProfileId === "custom" ? 0 : -1}
+              className={`preset-chip-btn preset-chip-custom ${
+                selectedProfileId === "custom" ? "selected" : ""
+              }`}
+              onClick={() => onProfileSelect("custom")}
+            >
+              <span className="preset-chip-name">{currentProfile.name}</span>
+              <span className="badge-custom-tag">Custom</span>
+            </button>
+          )}
+        </div>
+
+        {/* Active Profile Info / Description */}
+        <div className="active-profile-summary">
+          <div className="profile-desc-text">
+            {currentProfile.description}
+          </div>
+          {currentProfile.isCustom && (
+            <div className="custom-indicator-banner">
+              <Shield size={13} aria-hidden="true" />
+              <span>Custom hard rules &amp; multi-objective weights active</span>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Active Hard Constraints */}
+      {/* Active Hard Constraints Card */}
       <section className="form-group" aria-labelledby="heading-constraints">
         <h2 id="heading-constraints" className="form-label">
           Active Hard Constraints
         </h2>
-        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+        <div className="active-constraints-list">
           {currentProfile.noStairs && (
-            <div
-              style={{
-                fontSize: "12px",
-                color: "var(--civic-green)",
-                background: "var(--civic-green-subtle)",
-                padding: "4px 8px",
-                borderRadius: "4px",
-                border: "1px solid #C4E2D1",
-                fontWeight: 600,
-              }}
-            >
-              ✓ Strictly Step-Free (Stairs Prohibited)
+            <div className="constraint-badge-item">
+              <span className="constraint-badge-icon">✓</span>
+              <span>Strictly Step-Free (Stairs Prohibited)</span>
             </div>
           )}
           {currentProfile.requireWorkingLift && (
-            <div
-              style={{
-                fontSize: "12px",
-                color: "var(--civic-green)",
-                background: "var(--civic-green-subtle)",
-                padding: "4px 8px",
-                borderRadius: "4px",
-                border: "1px solid #C4E2D1",
-                fontWeight: 600,
-              }}
-            >
-              ✓ Operational Elevators Required
+            <div className="constraint-badge-item">
+              <span className="constraint-badge-icon">✓</span>
+              <span>Requires Operational Elevators</span>
             </div>
           )}
           {currentProfile.maxSlopePct !== undefined && (
-            <div
-              style={{
-                fontSize: "12px",
-                color: "var(--civic-green)",
-                background: "var(--civic-green-subtle)",
-                padding: "4px 8px",
-                borderRadius: "4px",
-                border: "1px solid #C4E2D1",
-                fontWeight: 600,
-              }}
-            >
-              ✓ Maximum Incline: {currentProfile.maxSlopePct}%
+            <div className="constraint-badge-item">
+              <span className="constraint-badge-icon">✓</span>
+              <span>Maximum Incline: {currentProfile.maxSlopePct}%</span>
             </div>
           )}
           {currentProfile.minWidthCm !== undefined && (
-            <div
-              style={{
-                fontSize: "12px",
-                color: "var(--civic-green)",
-                background: "var(--civic-green-subtle)",
-                padding: "4px 8px",
-                borderRadius: "4px",
-                border: "1px solid #C4E2D1",
-                fontWeight: 600,
-              }}
-            >
-              ✓ Minimum Clear Path Width: {currentProfile.minWidthCm}cm
+            <div className="constraint-badge-item">
+              <span className="constraint-badge-icon">✓</span>
+              <span>Minimum Clear Path Width: {currentProfile.minWidthCm}cm</span>
+            </div>
+          )}
+          {currentProfile.excludeUnevenSurface && (
+            <div className="constraint-badge-item">
+              <span className="constraint-badge-icon">✓</span>
+              <span>Excludes Uneven / Unpaved Surfaces</span>
             </div>
           )}
           {!currentProfile.noStairs &&
             !currentProfile.maxSlopePct &&
-            !currentProfile.minWidthCm && (
-              <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+            !currentProfile.minWidthCm &&
+            !currentProfile.excludeUnevenSurface && (
+              <div className="constraint-empty-notice">
                 No active exclusion filters (fastest mode)
               </div>
             )}
@@ -238,7 +270,7 @@ export const RouteControls: React.FC<RouteControlsProps> = ({
 
       {/* Temporary Barriers Simulation */}
       <section className="form-group" aria-labelledby="heading-barriers">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div className="section-title-row">
           <h2 id="heading-barriers" className="form-label">
             Active Campus Barriers
           </h2>
@@ -246,21 +278,14 @@ export const RouteControls: React.FC<RouteControlsProps> = ({
             type="button"
             onClick={onResetBarriers}
             title="Reset to default demonstration barriers"
-            style={{
-              fontSize: "11px",
-              color: "var(--text-secondary)",
-              background: "none",
-              border: "none",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-            }}
+            className="btn-text-action"
           >
-            <RotateCcw size={11} /> Reset
+            <RotateCcw size={12} aria-hidden="true" />
+            <span>Reset</span>
           </button>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        <div className="barriers-container">
           {activeBarriers.map((barrier) => {
             return (
               <div
@@ -278,16 +303,8 @@ export const RouteControls: React.FC<RouteControlsProps> = ({
                 <button
                   type="button"
                   onClick={() => onToggleBarrier(barrier.id)}
-                  style={{
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    border: "1px solid var(--border-strong)",
-                    background: "#FFFFFF",
-                    fontSize: "11px",
-                    fontWeight: 700,
-                    color: barrier.hardBlock ? "var(--red-closure)" : "var(--amber-warning)",
-                    flexShrink: 0,
-                  }}
+                  className="barrier-remove-btn"
+                  title={`Remove simulated barrier ${barrier.id}`}
                 >
                   Remove
                 </button>
@@ -298,15 +315,9 @@ export const RouteControls: React.FC<RouteControlsProps> = ({
           <button
             type="button"
             onClick={onOpenAddBarrierModal}
-            className="nav-tab-btn"
-            style={{
-              justifyContent: "center",
-              border: "1px dashed var(--border-strong)",
-              background: "#FFFFFF",
-              marginTop: "4px",
-            }}
+            className="btn btn-outline btn-add-barrier"
           >
-            <PlusCircle size={15} />
+            <PlusCircle size={15} aria-hidden="true" />
             <span>Simulate Temporary Barrier</span>
           </button>
         </div>

@@ -101,9 +101,9 @@ $$\text{Key}(u) = \langle C(u), \; T_{\text{sec}}(u), \; D_{\text{meters}}(u), \
 1. Primary: Lowest cumulative multi-objective cost $C(u)$.
 2. Secondary: Lowest physical duration $T_{\text{sec}}(u)$.
 3. Tertiary: Shortest physical distance $D_{\text{meters}}(u)$.
-4. Quaternary: Lexicographical node ID string comparison.
+4. Quaternary: Lexicographical deterministic path key `pathKey` string comparison.
 
-This guarantees mathematical determinism across all browser runtimes and operating systems.
+This guarantees mathematical determinism across all browser runtimes, operating systems, and edge insertion sequences.
 
 ---
 
@@ -112,23 +112,26 @@ This guarantees mathematical determinism across all browser runtimes and operati
 ### 3.1 Network Penalty Ratio
 For each campus benchmark scenario $s \in S$, we evaluate the optimal unconstrained travel time $T_{\text{fastest}}(s)$ against the profile-compliant accessible travel time $T_{\text{accessible}}(s)$:
 
-$$\text{AccessPenalty}(s) = \begin{cases}
-\frac{T_{\text{accessible}}(s)}{T_{\text{fastest}}(s)} & \text{if path connected} \\
-10.0 & \text{if path disconnected (impassable)}
-\end{cases}$$
+$$\text{AccessPenalty}(s) = \frac{T_{\text{accessible}}(s)}{T_{\text{fastest}}(s)} \quad (\text{for connected accessible routes})$$
 
-A penalty of $1.00$ indicates perfect parity with able-bodied navigation. A penalty of $1.65$ represents a 65% temporal burden imposed on the traveler.
+Disconnected routes (where no viable path satisfies all hard constraints) are not assigned a fabricated multiplier; they are treated as structural impasses, counted separately in `disconnectedCount`, and flagged as impassable in the dashboard. The average access penalty across the network is computed strictly across connected routes:
+
+$$\overline{\text{AccessPenalty}} = \frac{1}{|S_{\text{connected}}|} \sum_{s \in S_{\text{connected}}} \text{AccessPenalty}(s)$$
+
+A penalty ratio of $1.00\times$ indicates parity with the unconstrained fastest baseline. A penalty of $1.29\times$ represents a 29% temporal detour burden imposed on the traveler.
 
 ### 3.2 Counterfactual Repair Simulation
-To determine which capital repair yields the greatest public benefit, the engine simulates the hypothetical resolution of each active barrier $b \in B$:
+To determine which capital repair yields the greatest network benefit, the engine simulates the hypothetical resolution of each active barrier $b \in B$:
 
-$$\Delta \text{Disconnected}(b) = D_{\text{current}} - D_{\text{after}(b)}$$
+$$\Delta \text{Disconnected}(b) = D_{\text{current}} - D_{\text{without}(b)}$$
 
-$$\text{MinutesRecovered}(b) = \sum_{s \in S} \max\left(0, \; \frac{T_{\text{before}}(s) - T_{\text{after}(b)}(s)}{60}\right)$$
+$$\text{MinutesRecovered}(b) = \sum_{s \in S} \max\left(0, \; \frac{T_{\text{before}}(s) - T_{\text{without}(b)}(s)}{60}\right)$$
 
-$$\text{ImpactScore}(b) = \left(100 \times \Delta \text{Disconnected}(b)\right) + \text{MinutesRecovered}(b)$$
-
-Repairs that reconnect isolated buildings score highest; secondary prioritization ranks work by cumulative minutes saved across all student journeys.
+Deterministic candidate ranking prioritizes:
+1. Reconnecting isolated destinations ($\Delta \text{Disconnected}$ descending);
+2. Cumulative travel minutes saved ($\text{MinutesRecovered}$ descending);
+3. Number of distinct accessibility profiles benefited ($\text{ProfilesHelped}$ descending);
+4. Lexicographical barrier ID tie-breaker for deterministic stability.
 
 ---
 

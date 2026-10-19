@@ -60,12 +60,17 @@
 - Authored code-accurate vector architecture diagram in `docs/assets/architecture.svg` (~960px).
 
 ### 7. Documentation Suite & Final Judge-Ready Verification (`2026-10-19T16:34:00+05:30`)
-- Authored comprehensive documentation suite:
-  - `README.md`: Judge-grade landing page with real screenshots, architecture diagram, mathematical formulations, setup instructions, and honest disclosures.
-  - `docs/ARCHITECTURE.md`: In-depth engineering architectural specification.
-  - `docs/DATA_DICTIONARY.md`: Complete schema of nodes, edges, profiles, barriers, scenarios, reports.
-  - `docs/EVALUATION.md`: Mathematical formulation, benchmark scenario suite, empirical verification results.
-  - `docs/PRIVACY_AND_LIMITATIONS.md`: 100% client-side privacy guarantees, synthetic data notice, non-medical disclaimer.
-  - `docs/DEVPOST_SUBMISSION.md`: Full copy-paste Devpost submission text.
-  - `docs/DEMO_SCRIPT.md`: Word-for-word timed 3:20 video recording script matching the signature journey.
-  - `docs/SUBMISSION_CHECKLIST.md`: Verification checklist ensuring everything is 100% complete for judging.
+- Authored comprehensive documentation suite (`README.md`, `docs/ARCHITECTURE.md`, `docs/DATA_DICTIONARY.md`, `docs/EVALUATION.md`, `docs/PRIVACY_AND_LIMITATIONS.md`, `docs/DEVPOST_SUBMISSION.md`, `docs/DEMO_SCRIPT.md`, `docs/SUBMISSION_CHECKLIST.md`).
+
+### 8. Corrective Execution & Comprehensive Verification (`2026-10-19T18:00:00+05:30`)
+- Systematically resolved all P0 corrective engineering directives:
+  - **P0-1 (Responsive Layout & Visual Polish):** Replaced legacy styling with strict 3-column desktop planner (`340px minmax(460px, 1fr) 380px`), mobile stacking, 4-card Access Debt KPI grid, and styled ranked repairs table.
+  - **P0-2 (Accessible Modal Dialogs):** Added Tab and Shift+Tab focus cycle trapping, Escape key closing, and opener focus restoration to all dialogs (`AddBarrierModal.tsx`, `CustomProfileModal.tsx`).
+  - **P0-3 (Offline Resilience):** Implemented offline root navigation fallback in `public/sw.js` and verified offline reload in Playwright under simulated offline mode.
+  - **P0-4 (Expanded E2E Verification):** Expanded Playwright test suite to 9 distinct test definitions across 5 viewports (45 total executions, 100% pass, 0 Axe WCAG 2.2 AA violations).
+  - **P0-5 (Deterministic Routing & Barrier Lifecycle):** Implemented lexicographical `pathKey` tie-breaking across edge shuffles; added `isBarrierActive(barrier, evaluationTime)` respecting `startsAt` and `expiresAt`.
+  - **P0-6 (Custom Mobility Profile):** Authored `CustomProfileModal.tsx` exposing hard constraints (stairs, lifts, slope %, path width, uneven surfaces) and soft weights with local storage persistence and active badge.
+  - **P0-7 (Access Debt Reconciliation):** Reconciled mathematical model: removed fabricated 10.0 penalty; disconnected routes tracked separately in `disconnectedCount`; benchmark metrics measured via `scripts/run-benchmarks.ts` (0.023ms Dijkstra median, 0.731ms audit median).
+  - **P0-8 (Truthful Documentation):** Replaced real university name with "Synthetic Demo Campus"; cited WHO (2011), UNICEF (2019), and OSM; updated quickstart to `npm ci`.
+  - **P0-9 (CI & Quality Gates):** Upgraded CI to Node 22, full-history checkout (`fetch-depth: 0`), ESLint (`npm run lint`), dependency audit (`npm run audit`), and streamlined GitHub Pages deployment.
+  - **P0-10 (Submission Readiness):** Separated verified engineering gates from external pending items with explicit `PUBLIC_DEMO_VIDEO_URL_REQUIRED` placeholders.

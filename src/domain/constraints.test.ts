@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { checkEdgeHardConstraints, getActiveHardConstraintDescriptions } from "./constraints";
+import {
+  checkEdgeHardConstraints,
+  getActiveHardConstraintDescriptions,
+  isBarrierActive,
+  filterActiveBarriers,
+} from "./constraints";
 import { ROUTE_PROFILES } from "./profiles";
 import { CampusEdge, Barrier } from "./types";
 
@@ -118,5 +123,71 @@ describe("Constraint Filter (Hard Rules)", () => {
     expect(descriptions).toContain("Strictly Step-Free (No Stairs)");
     expect(descriptions).toContain("Requires Operational Elevators");
     expect(descriptions).toContain("Maximum Incline: 6%");
+  });
+
+  describe("Barrier Lifecycle Semantics", () => {
+    const evalTime = new Date("2026-10-19T12:00:00Z");
+
+    it("evaluates barrier as inactive when startsAt is in the future", () => {
+      const futureBarrier: Barrier = {
+        id: "b_future",
+        edgeId: BASE_EDGE.id,
+        kind: "closed",
+        hardBlock: true,
+        severity: 3,
+        note: "Scheduled construction tomorrow",
+        startsAt: "2026-10-20T08:00:00Z",
+        demoOnly: true,
+      };
+
+      expect(isBarrierActive(futureBarrier, evalTime)).toBe(false);
+      const activeList = filterActiveBarriers([futureBarrier], evalTime);
+      expect(activeList).toHaveLength(0);
+
+      const check = checkEdgeHardConstraints(BASE_EDGE, ROUTE_PROFILES.fastest, [futureBarrier], evalTime);
+      expect(check.eligible).toBe(true);
+    });
+
+    it("evaluates barrier as active when startsAt has passed and expiresAt is in the future", () => {
+      const activeBarrier: Barrier = {
+        id: "b_active",
+        edgeId: BASE_EDGE.id,
+        kind: "closed",
+        hardBlock: true,
+        severity: 3,
+        note: "Active pipe repair",
+        startsAt: "2026-10-19T08:00:00Z",
+        expiresAt: "2026-10-19T18:00:00Z",
+        demoOnly: true,
+      };
+
+      expect(isBarrierActive(activeBarrier, evalTime)).toBe(true);
+      const activeList = filterActiveBarriers([activeBarrier], evalTime);
+      expect(activeList).toHaveLength(1);
+
+      const check = checkEdgeHardConstraints(BASE_EDGE, ROUTE_PROFILES.fastest, [activeBarrier], evalTime);
+      expect(check.eligible).toBe(false);
+    });
+
+    it("evaluates barrier as inactive when expiresAt has passed (expired)", () => {
+      const expiredBarrier: Barrier = {
+        id: "b_expired",
+        edgeId: BASE_EDGE.id,
+        kind: "closed",
+        hardBlock: true,
+        severity: 3,
+        note: "Completed maintenance yesterday",
+        startsAt: "2026-10-18T08:00:00Z",
+        expiresAt: "2026-10-19T10:00:00Z",
+        demoOnly: true,
+      };
+
+      expect(isBarrierActive(expiredBarrier, evalTime)).toBe(false);
+      const activeList = filterActiveBarriers([expiredBarrier], evalTime);
+      expect(activeList).toHaveLength(0);
+
+      const check = checkEdgeHardConstraints(BASE_EDGE, ROUTE_PROFILES.fastest, [expiredBarrier], evalTime);
+      expect(check.eligible).toBe(true);
+    });
   });
 });

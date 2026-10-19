@@ -4,8 +4,8 @@ import { App } from './App';
 import './styles/index.css';
 
 // Register Service Worker for offline capability
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-  window.addEventListener('load', () => {
+if ('serviceWorker' in navigator && (import.meta.env.PROD || process.env.NODE_ENV === 'production')) {
+  const registerSW = () => {
     navigator.serviceWorker
       .register('./sw.js')
       .then((registration) => {
@@ -14,7 +14,13 @@ if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
       .catch((error) => {
         console.error('AccessGraph ServiceWorker registration failed:', error);
       });
-  });
+  };
+
+  if (document.readyState === 'complete') {
+    registerSW();
+  } else {
+    window.addEventListener('load', registerSW);
+  }
 }
 
 const rootElement = document.getElementById('root');

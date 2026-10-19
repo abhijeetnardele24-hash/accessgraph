@@ -51,6 +51,7 @@ export interface RouteProfile {
   minWidthCm?: number;
   excludeUnevenSurface: boolean;
   weights: RouteProfileWeights;
+  isCustom?: boolean;
 }
 
 export type BarrierKind = "closed" | "lift_outage" | "obstruction" | "crowding" | "poor_light";
