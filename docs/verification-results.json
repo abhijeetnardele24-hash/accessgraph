@@ -1,55 +1,104 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-10-22T17:57:33.313Z",
-  "commitSha": "315496df314cf3c38e97bef83eb3c62e3cc6db0c",
+  "generatorVersion": "1.0.0",
+  "generatedAt": "2026-10-22T18:29:14.873Z",
+  "commitSha": "564842304abd456dfd22ab786c4635fb0b8183c7",
+  "baselineSha": "315496df314cf3c38e97bef83eb3c62e3cc6db0c",
   "policyHash": "d3a24931583bfe582863058b7ec3ad354ac32c24c4ca0e3273c6507cb78ec588",
-  "receiptChecksumSha256": "76d6d62bcecab9d67df1f8e5c368bf0e4567c22473819fed5ded2d8ee507fbf6",
+  "baselineTag": {
+    "name": "pre-routewitness-baseline",
+    "valid": true,
+    "targetSha": "a85d644148a774412eac65feadb93c7d9f9cb595"
+  },
+  "receiptChecksumSha256": "9e923a3e041f43564143b51fa42799a357a0dd3c571819fbe7d3d169fc3531d3",
+  "pipelineUrl": "NOT_MEASURED",
+  "cloudRun": {
+    "revision": "NOT_MEASURED",
+    "candidateUrl": "NOT_MEASURED",
+    "status": "NOT_MEASURED"
+  },
+  "ociImage": {
+    "digest": "NOT_MEASURED",
+    "status": "NOT_MEASURED"
+  },
   "stages": {
     "plan": {
+      "stage": "plan",
       "status": "COVERED",
-      "method": "GitLab Duo Impact Classifier Flow"
+      "evidenceStatus": "MEASURED",
+      "method": "GitLab Duo Impact Classifier Flow v1 + MCP",
+      "artifact": "artifacts/route-witness/impact-manifest.json"
     },
     "create": {
+      "stage": "create",
       "status": "COVERED",
-      "method": "Corrective MR generator / code commit"
+      "evidenceStatus": "MEASURED",
+      "method": "Deterministic counterexample reducer & corrective MR candidate",
+      "artifact": "route-witness/core/minimize.ts"
     },
     "verify": {
+      "stage": "verify",
       "status": "COVERED",
-      "method": "Vitest (55 tests) + Playwright + Axe"
+      "evidenceStatus": "MEASURED",
+      "method": "Vitest (72 tests passed, coverage 82.13%) + Axe accessibility",
+      "artifact": "junit.xml"
     },
     "package": {
-      "status": "COVERED",
-      "method": "OCI Container Build (Multi-stage non-root)"
+      "stage": "package",
+      "status": "PARTIAL",
+      "evidenceStatus": "NOT_MEASURED",
+      "method": "Multi-stage Dockerfile verified locally",
+      "artifact": "Dockerfile"
     },
     "secure": {
+      "stage": "secure",
       "status": "COVERED",
-      "method": "npm audit + Secret Scan"
+      "evidenceStatus": "MEASURED",
+      "method": "Secret scan (0 violations) + npm audit",
+      "artifact": "docs/security-audit.json"
     },
     "release": {
-      "status": "COVERED",
-      "method": "Google Cloud Run tagged candidate revision"
+      "stage": "release",
+      "status": "NOT_COVERED",
+      "evidenceStatus": "NOT_MEASURED",
+      "method": "Ready deploy scripts (unexecuted without GCP project credentials)",
+      "artifact": "deploy/deploy.sh"
     },
     "configure": {
+      "stage": "configure",
       "status": "COVERED",
-      "method": "Protected branch policy & CODEOWNERS"
+      "evidenceStatus": "MEASURED",
+      "method": "Protected policy hash (d3a24931583bfe58...) + CODEOWNERS",
+      "artifact": "policy/route-invariants.json"
     },
     "monitor": {
-      "status": "COVERED",
-      "method": "Health check + Deployed Witness Replay"
+      "stage": "monitor",
+      "status": "NOT_COVERED",
+      "evidenceStatus": "NOT_MEASURED",
+      "method": "Local server.cjs healthz probe verified",
+      "artifact": "scripts/replay-deployment.ts"
     },
     "govern": {
+      "stage": "govern",
       "status": "COVERED",
-      "method": "Supervised human promotion & Release Receipt"
+      "evidenceStatus": "HUMAN_APPROVAL_REQUIRED",
+      "method": "Supervised human promotion gate & signed Release Receipt",
+      "artifact": "artifacts/route-witness/release-receipt.json"
     }
   },
   "verificationSummary": {
-    "unitAndDomainTestsPassed": 55,
+    "totalTests": 72,
+    "passedTests": 72,
+    "failedTests": 0,
+    "coverageStatementsPct": 82.13,
+    "coverageBranchesPct": 79.93,
+    "coverageLinesPct": 82.13,
+    "securityViolationsCount": 0,
+    "provenanceBaselineValid": true,
     "goldenRegressionTestPassed": true,
-    "e2eAccessibilityScansRun": true,
-    "criticalVulnerabilities": 0,
-    "highVulnerabilities": 0,
     "syntheticDataDisclosurePresent": true,
     "nonCertificationDisclosurePresent": true
   },
-  "disclaimer": "All route and campus data used in RouteWitness is synthetic (isSyntheticDemo: true). No legal, safety, or accessibility certification is claimed."
+  "disclaimer": "All route and campus data used in RouteWitness is synthetic (isSyntheticDemo: true). No legal, safety, or accessibility certification is claimed.",
+  "nonCertificationDisclosure": "This receipt is an integrity-verified evidence bundle. It is not a legal, safety, or accessibility certification."
 }

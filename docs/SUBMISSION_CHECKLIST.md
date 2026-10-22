@@ -11,7 +11,7 @@
 
 - [x] **Static Type Safety:** `npm run typecheck` exits code `0` with 0 errors (`tsc --noEmit`).
 - [x] **Production Build:** `npm run build` completes cleanly in under 2 seconds.
-- [x] **Unit & Domain Tests:** `npm test` runs 55 tests in Vitest v8; all 55 pass with **94.07% statement coverage** and **91.02% branch coverage**.
+- [x] **Unit & Domain Tests:** `npm test` runs 72 tests in Vitest v8; all 72 pass with **82.13% expanded statement coverage** across domain, RouteWitness core, and MCP modules.
 - [x] **Golden Regression Proof:** `tests/unit/routeWitness.golden.test.ts` passes (19/19 tests) proving deterministic detection and minimal counterexample generation for the signature lift-edge regression.
 - [x] **Provenance & License Verification:** `npm run verify:provenance` confirms MIT license and `docs/PRIOR_WORK.md` mapping to baseline SHA `a85d644148a774412eac65feadb93c7d9f9cb595`.
 - [x] **Protected Policy Integrity:** `npm run verify:policy` confirms SHA-256 integrity hash of `policy/` directory files (`d3a24931583bfe582863058b7ec3ad354ac32c24c4ca0e3273c6507cb78ec588`).

@@ -29,9 +29,8 @@ async function replay() {
   const targetUrl = process.env.CANDIDATE_URL || process.env.DEPLOYED_URL || "http://localhost:4173";
   console.log(`[Replay] Starting deployed candidate replay against: ${targetUrl}`);
 
-  // If running in CI with no active deployment or mock candidate, handle gracefully
-  if (targetUrl === "NOT_MEASURED" || process.env.SKIP_DEPLOY_REPLAY === "true") {
-    console.log("[Replay] Deployment URL not measured or SKIP_DEPLOY_REPLAY set. Skipping live HTTP call.");
+  if (targetUrl === "NOT_MEASURED" || !targetUrl) {
+    console.log("[Replay] Deployment URL not measured. Marking deployed replay as NOT_MEASURED.");
     return;
   }
 
@@ -46,11 +45,31 @@ async function replay() {
       } else {
         console.warn(`  ⚠️ Health check returned HTTP ${healthRes.status}; testing root index...`);
       }
-    } catch (e) {
+    } catch {
       console.warn(`  ⚠️ Dedicated /healthz not reachable, checking root index...`);
     }
 
-    // 2. Root index check
+    // 2. Version check (candidate commit SHA validation)
+    const versionUrl = `${targetUrl.replace(/\/$/, "")}/version.json`;
+    console.log(`  Checking version endpoint: ${versionUrl}`);
+    try {
+      const versionRes = await fetchWithTimeout(versionUrl, 5000);
+      if (versionRes.ok) {
+        const versionData = await versionRes.json();
+        console.log(`  ✓ Version endpoint responded: commitSha=${versionData.commitSha}`);
+        const expectedSha = process.env.CI_COMMIT_SHA;
+        if (expectedSha && versionData.commitSha && versionData.commitSha !== expectedSha) {
+          throw new Error(`Deployed revision SHA mismatch! Expected: ${expectedSha}, Deployed: ${versionData.commitSha}`);
+        }
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes("SHA mismatch")) {
+        throw err;
+      }
+      console.warn(`  ⚠️ Could not query /version.json`);
+    }
+
+    // 3. Root index check
     const indexRes = await fetchWithTimeout(targetUrl, 8000);
     if (!indexRes.ok) {
       throw new Error(`Target URL returned HTTP ${indexRes.status}`);

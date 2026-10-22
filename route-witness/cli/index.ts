@@ -19,6 +19,8 @@ import { ROUTE_PROFILES } from "../../src/domain/profiles.js";
 import { DEMO_CAMPUS } from "../../src/data/demoCampus.js";
 import type { CampusDataset } from "../../src/domain/types.js";
 import type { JourneyWitness, GateResult, StageEvidence } from "../core/schemas.js";
+import { resolveRefs, getChangedFilesBetweenRefs, loadDatasetFromRef } from "../core/loader.js";
+import { computePolicyHash } from "../../scripts/verify-policy-integrity.js";
 
 const ARTIFACTS_DIR = resolve(process.cwd(), "artifacts/route-witness");
 
@@ -30,47 +32,82 @@ function ensureArtifactsDir() {
 
 async function runClassify(changedFilesArg?: string) {
   ensureArtifactsDir();
-  const changedFiles = changedFilesArg
-    ? changedFilesArg.split(",").map((s) => s.trim()).filter(Boolean)
-    : ["src/data/demoCampus.ts"];
+  const { baselineSha, candidateSha } = resolveRefs();
+
+  let changedFiles: string[];
+  if (changedFilesArg && changedFilesArg.trim().length > 0) {
+    changedFiles = changedFilesArg.split(",").map((s) => s.trim()).filter(Boolean);
+  } else {
+    changedFiles = getChangedFilesBetweenRefs(baselineSha, candidateSha);
+  }
+
+  let dataset: CampusDataset;
+  try {
+    dataset = loadDatasetFromRef(candidateSha);
+  } catch {
+    dataset = DEMO_CAMPUS;
+  }
 
   const manifest = classifyRouteChange({
-    baselineSha: (process.env.CI_MERGE_REQUEST_DIFF_BASE_SHA || "a".repeat(40)).slice(0, 40),
-    candidateSha: (process.env.CI_COMMIT_SHA || "b".repeat(40)).slice(0, 40),
+    baselineSha,
+    candidateSha,
     changedFiles,
-    dataset: DEMO_CAMPUS,
+    dataset,
   });
 
   const outPath = resolve(ARTIFACTS_DIR, "impact-manifest.json");
   writeFileSync(outPath, JSON.stringify(manifest, null, 2), "utf8");
   console.log(`[RouteWitness] Impact manifest written to: ${outPath}`);
+  console.log(`[RouteWitness] Baseline SHA: ${baselineSha}`);
+  console.log(`[RouteWitness] Candidate SHA: ${candidateSha}`);
+  console.log(`[RouteWitness] Changed files: ${changedFiles.join(", ") || "(none)"}`);
   console.log(`[RouteWitness] Affected profiles: ${manifest.affectedProfiles.join(", ") || "none"}`);
   console.log(`[RouteWitness] Required test families: ${manifest.requiredTestFamilies.join(", ")}`);
 }
 
-async function runCompare(candidateDataPath?: string) {
+async function runCompare(candidateDataPath?: string, baselineDataPath?: string) {
   ensureArtifactsDir();
-  let candidateDataset: CampusDataset = DEMO_CAMPUS;
+  const { baselineSha, candidateSha } = resolveRefs();
 
+  let baselineDataset: CampusDataset;
+  if (baselineDataPath && existsSync(baselineDataPath)) {
+    baselineDataset = JSON.parse(readFileSync(baselineDataPath, "utf8"));
+  } else {
+    try {
+      baselineDataset = loadDatasetFromRef(baselineSha);
+    } catch {
+      baselineDataset = DEMO_CAMPUS;
+    }
+  }
+
+  let candidateDataset: CampusDataset;
   if (candidateDataPath && existsSync(candidateDataPath)) {
     candidateDataset = JSON.parse(readFileSync(candidateDataPath, "utf8"));
+  } else {
+    try {
+      candidateDataset = loadDatasetFromRef(candidateSha);
+    } catch {
+      candidateDataset = DEMO_CAMPUS;
+    }
   }
 
   const scenariosPath = resolve(process.cwd(), "policy/benchmark-scenarios.json");
-  const scenariosData = existsSync(scenariosPath)
-    ? JSON.parse(readFileSync(scenariosPath, "utf8")).scenarios
-    : [];
+  if (!existsSync(scenariosPath)) {
+    throw new Error(`[RouteWitness] Benchmark scenarios missing: ${scenariosPath}`);
+  }
+  const scenariosData = JSON.parse(readFileSync(scenariosPath, "utf8")).scenarios;
 
   const profilesMap = new Map(Object.entries(ROUTE_PROFILES));
+  const policyHash = computePolicyHash();
 
   const result = compareRouteImpact({
-    baselineSha: (process.env.CI_MERGE_REQUEST_DIFF_BASE_SHA || "a".repeat(40)).slice(0, 40),
-    candidateSha: (process.env.CI_COMMIT_SHA || "b".repeat(40)).slice(0, 40),
-    baselineDataset: DEMO_CAMPUS,
+    baselineSha,
+    candidateSha,
+    baselineDataset,
     candidateDataset,
     profiles: profilesMap,
     scenarios: scenariosData,
-    policyHash: "verified-policy-hash",
+    policyHash,
     fixtureVersion: "1.0.0",
   });
 
@@ -110,10 +147,19 @@ async function runMinimize() {
 
 async function runReceipt() {
   ensureArtifactsDir();
+  const { candidateSha } = resolveRefs();
   const witnessesPath = resolve(ARTIFACTS_DIR, "witnesses.json");
   const witnesses: JourneyWitness[] = existsSync(witnessesPath)
     ? JSON.parse(readFileSync(witnessesPath, "utf8"))
     : [];
+
+  const candidateUrl = process.env.CANDIDATE_URL || "NOT_MEASURED";
+  const imageDigest = process.env.OCI_IMAGE_DIGEST || "NOT_MEASURED";
+  const cloudRunRevision = process.env.CLOUD_RUN_REVISION || "NOT_MEASURED";
+  const pipelineUrl = process.env.CI_PIPELINE_URL || "NOT_MEASURED";
+
+  const isDeployed = candidateUrl !== "NOT_MEASURED";
+  const isPackaged = imageDigest !== "NOT_MEASURED";
 
   const gates: GateResult[] = [
     {
@@ -121,35 +167,35 @@ async function runReceipt() {
       label: "Origin and License Provenance",
       status: "PASS",
       evidenceStatus: "MEASURED",
-      commitSha: (process.env.CI_COMMIT_SHA || "c".repeat(40)).slice(0, 40),
+      commitSha: candidateSha,
     },
     {
       gateId: "GATE-02-POLICY",
       label: "Protected Policy Integrity",
       status: "PASS",
       evidenceStatus: "MEASURED",
-      commitSha: (process.env.CI_COMMIT_SHA || "c".repeat(40)).slice(0, 40),
+      commitSha: candidateSha,
     },
     {
       gateId: "GATE-03-INVARIANTS",
       label: "Route Invariant Verification",
       status: witnesses.some((w) => w.verdict === "BLOCK") ? "FAIL" : "PASS",
       evidenceStatus: "MEASURED",
-      commitSha: (process.env.CI_COMMIT_SHA || "c".repeat(40)).slice(0, 40),
+      commitSha: candidateSha,
     },
     {
       gateId: "GATE-04-SECURITY",
       label: "Dependency & Secret Scan",
       status: "PASS",
       evidenceStatus: "MEASURED",
-      commitSha: (process.env.CI_COMMIT_SHA || "c".repeat(40)).slice(0, 40),
+      commitSha: candidateSha,
     },
     {
       gateId: "GATE-05-ACCESSIBILITY",
       label: "Automated Axe & Contrast Audit",
       status: "PASS",
       evidenceStatus: "MEASURED",
-      commitSha: (process.env.CI_COMMIT_SHA || "c".repeat(40)).slice(0, 40),
+      commitSha: candidateSha,
     },
   ];
 
@@ -157,20 +203,20 @@ async function runReceipt() {
     { stage: "plan", status: "COVERED", evidenceStatus: "MEASURED", description: "Duo Impact Manifest", artifactLinks: ["artifacts/route-witness/impact-manifest.json"], jobLinks: [] },
     { stage: "create", status: "COVERED", evidenceStatus: "MEASURED", description: "Automated corrective MR capability", artifactLinks: [], jobLinks: [] },
     { stage: "verify", status: "COVERED", evidenceStatus: "MEASURED", description: "Vitest + Playwright + Axe", artifactLinks: ["artifacts/route-witness/witnesses.json"], jobLinks: [] },
-    { stage: "package", status: "COVERED", evidenceStatus: "MEASURED", description: "OCI Container image build", artifactLinks: [], jobLinks: [] },
+    { stage: "package", status: isPackaged ? "COVERED" : "PARTIAL", evidenceStatus: isPackaged ? "MEASURED" : "NOT_MEASURED", description: "OCI Container image build", artifactLinks: [], jobLinks: [] },
     { stage: "secure", status: "COVERED", evidenceStatus: "MEASURED", description: "Secret scan + Dependency audit", artifactLinks: ["docs/security-audit.json"], jobLinks: [] },
-    { stage: "release", status: "COVERED", evidenceStatus: "MEASURED", description: "Cloud Run tagged candidate revision", artifactLinks: [], jobLinks: [] },
+    { stage: "release", status: isDeployed ? "COVERED" : "NOT_COVERED", evidenceStatus: isDeployed ? "MEASURED" : "NOT_MEASURED", description: "Cloud Run tagged candidate revision", artifactLinks: [], jobLinks: [] },
     { stage: "configure", status: "COVERED", evidenceStatus: "MEASURED", description: "Target branch protected policy", artifactLinks: ["policy/route-invariants.json"], jobLinks: [] },
-    { stage: "monitor", status: "COVERED", evidenceStatus: "MEASURED", description: "Candidate HTTP health & witness replay", artifactLinks: [], jobLinks: [] },
+    { stage: "monitor", status: isDeployed ? "COVERED" : "NOT_COVERED", evidenceStatus: isDeployed ? "MEASURED" : "NOT_MEASURED", description: "Candidate HTTP health & witness replay", artifactLinks: [], jobLinks: [] },
     { stage: "govern", status: "COVERED", evidenceStatus: "MEASURED", description: "CODEOWNERS + Supervised Human Approval", artifactLinks: ["CODEOWNERS"], jobLinks: [] },
   ];
 
   const receipt = buildReleaseReceipt({
-    commitSha: (process.env.CI_COMMIT_SHA || "c".repeat(40)).slice(0, 40),
-    pipelineUrl: process.env.CI_PIPELINE_URL || "NOT_MEASURED",
-    imageDigest: process.env.OCI_IMAGE_DIGEST || "NOT_MEASURED",
-    cloudRunRevision: process.env.CLOUD_RUN_REVISION || "NOT_MEASURED",
-    candidateUrl: process.env.CANDIDATE_URL || "NOT_MEASURED",
+    commitSha: candidateSha,
+    pipelineUrl,
+    imageDigest,
+    cloudRunRevision,
+    candidateUrl,
     witnessSummary: witnesses,
     gateResults: gates,
     lifecycleEvidence: stages,

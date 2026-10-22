@@ -36,9 +36,9 @@ RouteWitness wraps routing software in a supervised **GitLab Duo Agent Platform*
 - Evaluates hard invariants: `INV-01` (No Unexplained Disconnection), `INV-02` (No Forbidden Edge Traversal), `INV-03` (Deterministic Tie-Breaking), `INV-04` (Complete Route Attributes).
 - **Minimal Counterexample Reducer:** Instead of a 300-case failure dump, RouteWitness isolates the single, simplest journey proving the regression (Origin, Destination, Profile, and Violated Invariant) to post directly to the MR.
 
-### 3. Google Cloud Run Candidate Deployment & Replay
-- Every candidate build packages an immutable OCI container and deploys a tagged Google Cloud Run revision receiving **0% production traffic**.
-- The pipeline replayed the exact Journey Witness against the candidate container's live HTTP endpoints (`/healthz`, `/version.json`).
+### 3. Google Cloud Run Candidate Deployment & Replay Architecture
+- Every candidate build is configured to package an immutable OCI container and deploy a tagged Google Cloud Run revision receiving **0% production traffic** via Workload Identity Federation (WIF).
+- The pipeline candidate replay script validates the exact Journey Witness against live HTTP container endpoints (`/healthz`, `/version.json`).
 - **Supervised Human Release Gate:** Production promotion remains a protected, explicit human maintainer decision in GitLab CI.
 
 ### 4. Release Receipt Evidence Bundle
@@ -71,12 +71,12 @@ RouteWitness is entered under **Path B (Bring Your Own)**, building upon our exi
 |---|---|---|---|
 | **Plan** | Duo Flow triggers `classify_route_change` to identify affected edges & profiles. | `artifacts/route-witness/impact-manifest.json` | `MEASURED` |
 | **Create** | Duo generates minimal counterexample; prepares corrective commit/MR. | `artifacts/route-witness/minimal-witness.json` | `MEASURED` |
-| **Verify** | Vitest 55 tests passed (94.07% coverage) + Playwright Axe audit across viewports. | Vitest JUnit report + Coverage + Golden test | `MEASURED` |
-| **Package** | Multi-stage Dockerfile built and pushed to GitLab Container Registry. | OCI Image with SHA tag and captured digest | `MEASURED` |
-| **Secure** | Dependency audit (`npm audit`) + Secret scan (`security-scan.cjs`). | 0 high/critical vulnerabilities, 0 leaked secrets | `MEASURED` |
-| **Release** | Tagged candidate revision deployed to Google Cloud Run (0% traffic). | Cloud Run candidate revision URL | `MEASURED` |
-| **Configure** | Target-branch protected policy & CODEOWNERS governance. | `policy/route-invariants.json` + `CODEOWNERS` | `MEASURED` |
-| **Monitor** | Candidate `/healthz` probe and deployed Journey Witness replay. | `scripts/replay-deployment.ts` | `MEASURED` |
+| **Verify** | Vitest 72 tests passed (82.13% expanded coverage across domain, core & MCP) + Playwright Axe audit across viewports. | Vitest JUnit report + Coverage + Golden test | `MEASURED` |
+| **Package** | Multi-stage Dockerfile verified locally; container push configured for GitLab Registry. | `Dockerfile` + `.gitlab-ci.yml` (package job) | `PARTIAL` / `NOT_MEASURED` (pending cloud registry credentials) |
+| **Secure** | Dependency audit (`npm audit`) + Secret scan (`security-scan.cjs`). | `docs/security-audit.json` (0 high/critical vulnerabilities, 0 leaked secrets) | `MEASURED` |
+| **Release** | Tagged candidate revision deploy script configured for Google Cloud Run (0% traffic). | `deploy/deploy.sh` + `.gitlab-ci.yml` | `NOT_COVERED` / `NOT_MEASURED` (pending GCP project credentials) |
+| **Configure** | Target-branch protected policy & CODEOWNERS governance. | `policy/route-invariants.json` + `CODEOWNERS` (canonical hash: `d3a24931...`) | `MEASURED` |
+| **Monitor** | Container `/healthz` probe and `/version.json` SHA reflection verified on local server. | `server.cjs` + `scripts/replay-deployment.ts` | `NOT_COVERED` / `NOT_MEASURED` (pending live cloud deployment) |
 | **Govern** | Supervised manual production promotion & tamper-evident Release Receipt. | `artifacts/route-witness/release-receipt.json` | `HUMAN APPROVAL REQUIRED` |
 
 ---

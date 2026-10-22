@@ -10,7 +10,7 @@
 [![GitLab Duo Agent Platform](https://img.shields.io/badge/GitLab%20Duo-Custom%20Flow%20%2B%20MCP-E24329?logo=gitlab)](./docs/GITLAB_DUO_SETUP.md)
 [![Autonomy: Supervised](https://img.shields.io/badge/Autonomy-Supervised%20(Human%20Gate)-F59E0B.svg)](./docs/THREAT_MODEL.md)
 [![Deployment: Google Cloud Run](https://img.shields.io/badge/Deployment-Google%20Cloud%20Run-4285F4?logo=google-cloud)](./docs/GOOGLE_CLOUD_DEPLOYMENT.md)
-[![Unit Coverage: 94.07%](https://img.shields.io/badge/Coverage-94.07%25%20Statements-1B6494.svg)](https://github.com/abhijeetnardele24-hash/accessgraph)
+[![Unit Coverage: 82.13%](https://img.shields.io/badge/Coverage-82.13%25%20Expanded-1B6494.svg)](https://github.com/abhijeetnardele24-hash/accessgraph)
 [![License: MIT](https://img.shields.io/badge/License-MIT-4D5358.svg)](./LICENSE)
 
 [**Prior Work Provenance**](./docs/PRIOR_WORK.md) • [**GitLab Duo Setup**](./docs/GITLAB_DUO_SETUP.md) • [**Google Cloud Run Deploy**](./docs/GOOGLE_CLOUD_DEPLOYMENT.md) • [**Threat Model**](./docs/THREAT_MODEL.md) • [**Evidence Model**](./docs/EVIDENCE_MODEL.md) • [**Architecture Specs**](./docs/ARCHITECTURE.md)

@@ -71,7 +71,8 @@ const server = http.createServer((req, res) => {
   let filePath = path.join(DIST_DIR, pathname === "/" ? "index.html" : pathname);
 
   // Path traversal safeguard
-  if (!filePath.startsWith(DIST_DIR)) {
+  const rel = path.relative(DIST_DIR, filePath);
+  if (rel.startsWith("..") || path.isAbsolute(rel)) {
     res.writeHead(403);
     res.end("Forbidden");
     return;

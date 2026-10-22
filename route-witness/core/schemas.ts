@@ -177,11 +177,14 @@ export type ReleaseReceipt = z.infer<typeof ReleaseReceiptSchema>;
 
 export const FixtureDatasetSchema = z.object({
   id: z.string(),
+  name: z.string().optional(),
   version: z.string(),
   isSyntheticDemo: z.literal(true),
-  description: z.string(),
+  description: z.string().optional(),
+  attribution: z.string().optional(),
   nodes: z.array(z.object({ id: z.string() }).passthrough()),
   edges: z.array(z.object({ id: z.string() }).passthrough()),
-  barriers: z.array(z.object({ id: z.string() }).passthrough()),
+  defaultBarriers: z.array(z.object({ id: z.string() }).passthrough()).optional(),
+  barriers: z.array(z.object({ id: z.string() }).passthrough()).optional(),
 });
 export type FixtureDataset = z.infer<typeof FixtureDatasetSchema>;

@@ -55,4 +55,6 @@ function verify() {
   console.log("[Policy Integrity] Policy integrity verification PASSED.");
 }
 
-verify();
+if (process.argv[1] && process.argv[1].includes("verify-policy-integrity")) {
+  verify();
+}

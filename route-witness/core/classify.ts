@@ -40,7 +40,7 @@ export function classifyChangedFile(filePath: string): ChangeClassification {
   if (DOMAIN_UI_PATTERNS.some((p) => p.test(filePath))) return "domain-ui";
   if (UI_FILE_PATTERNS.some((p) => p.test(filePath))) return "ui";
   if (/tests\/|\.spec\.|\.test\./.test(filePath)) return "test";
-  if (/docs\/|README|AGENTS\.md/.test(filePath)) return "docs";
+  if (/docs\/|README|\.md$/i.test(filePath)) return "docs";
   return "infra";
 }
 
@@ -49,11 +49,19 @@ export interface ClassifyOptions {
   candidateSha: string;
   changedFiles: string[];
   dataset: CampusDataset;
+  availableScenarioIds?: string[];
   /** ISO 8601 timestamp for the manifest */
   timestamp?: string;
   /** Commit SHA for the manifest (same as candidateSha for CI) */
   commitSha?: string;
 }
+
+const DEFAULT_BENCHMARK_SCENARIO_IDS = [
+  "scenario_gate_to_sci_lab_step_free",
+  "scenario_gate_to_sci_lab_fastest",
+  "scenario_gate_to_library_step_free",
+  "scenario_sci_lab_to_dining_low_sensory",
+];
 
 /**
  * Produces a deterministic ImpactManifest for the given changed-file set
@@ -71,6 +79,7 @@ export function classifyRouteChange(opts: ClassifyOptions): ImpactManifest {
     candidateSha,
     changedFiles,
     dataset,
+    availableScenarioIds = DEFAULT_BENCHMARK_SCENARIO_IDS,
     timestamp = new Date().toISOString(),
     commitSha = candidateSha,
   } = opts;
@@ -101,12 +110,12 @@ export function classifyRouteChange(opts: ClassifyOptions): ImpactManifest {
 
   // All profiles must be re-evaluated when routing or data changes
   const affectedProfiles = hasRoutingChange
-    ? ["step-free", "low-sensory", "default", "custom"]
+    ? ["step_free", "step-free", "low_sensory", "fastest", "custom"]
     : [];
 
-  // Required scenario IDs: all if data/routing changed, otherwise targeted
+  // Required scenario IDs: real scenario IDs from benchmark suite when routing changed, otherwise empty
   const requiredScenarioIds = hasRoutingChange
-    ? dataset.edges.map((e) => e.id) // run all reachability scenarios
+    ? [...availableScenarioIds]
     : [];
 
   // Test families
