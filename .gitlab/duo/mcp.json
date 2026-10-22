@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "routewitness": {
+      "command": "npx",
+      "args": ["tsx", "route-witness/mcp/server.ts"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}

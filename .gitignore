@@ -32,6 +32,5 @@ pnpm-debug.log*
 lerna-debug.log*
 .eslintcache
 
-# OS Files
-.DS_Store
-Thumbs.db
+# Local Mirror
+.git-mirror-accessgraph/

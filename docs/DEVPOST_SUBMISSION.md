@@ -1,93 +1,108 @@
-# Devpost Submission — AccessGraph
+# Devpost Submission — RouteWitness
 
-> **Event:** EurekaDev 2026  
-> **Track:** Coding Track — Problem in the Community  
-> **Project Name:** AccessGraph  
-> **Tagline:** Constraint-aware campus navigation that turns inaccessible routes into actionable repair priorities.
+> **Hackathon:** Life After Code — GitLab Transcend Hackathon  
+> **Entry Path:** Path B — Bring Your Own (Built on [AccessGraph](https://github.com/abhijeetnardele24-hash/accessgraph))  
+> **Autonomy Category:** Supervised (Human-in-the-loop production gate)  
+> **Prizes Targeted:** Path B Best Supervised Agent, Most Stages Covered, Most Creative, Google Cloud Bonus  
+> **Project Name:** RouteWitness  
+> **Tagline:** A GitLab Duo release flow that proves who a route change would strand before production.
 
 ---
 
 ## 🎯 Pitch & Inspiration
 
-For students and campus visitors with physical disabilities, temporary injuries, low vision, or sensory sensitivities, a route optimized only for distance or walking time may still be unusable. Missing accessibility attributes can lead a wheelchair user toward stairs, expose a low-vision traveler to an unguided path, or depend on a lift that is out of service. The *World Health Organization (WHO) World Report on Disability* (2011) and *UNICEF Accessible Infrastructure Guidelines* (2019) discuss physical infrastructure and information barriers affecting participation.
+A route-planning application can pass every normal build, compile cleanly, and show zero automated page-level accessibility violations while a data or algorithm edit still silently erases the only viable journey for a wheelchair user.
 
-At the same time, university facilities management teams operate with constrained annual maintenance budgets. Without quantitative network data showing which physical bottlenecks cause the greatest collective disruption across daily student journeys, repair scheduling risks becoming reactive rather than systemically optimized.
+Code reviewers cannot manually cross-reference every origin, destination, elevation transition, barrier, and mobility profile against thousands of campus edges. When an elevator identifier is renamed or stairs are accidentally treated as a soft cost penalty rather than a hard constraint, the failure is often discovered by the person who is stranded.
 
-We built **AccessGraph** to solve both sides of this civic accessibility challenge:
-1. **For the Student:** An accessible, private wayfinding engine that reloads and operates offline after first online load, enforcing strict safety constraints (zero stairs, active elevator status, slope limits, surface textures) and optimizing routes across personalized multi-objective cost factors using OpenStreetMap accessibility attributes.
-2. **For the University:** An **"Access Debt"** diagnostic engine that quantitatively audits campus infrastructure, measuring the collective time burden imposed on disabled community members and ranking capital repairs by maximum network-wide time and connectivity restored.
+We built **RouteWitness** to answer a more important question than *"did the tests pass?"*:
+
+> **"Did this change remove the only usable route for any supported mobility profile, and can we prove the answer before production?"**
 
 ---
 
 ## 🚀 What It Does
 
-AccessGraph functions as a dual-engine progressive web application:
+RouteWitness wraps routing software in a supervised **GitLab Duo Agent Platform** release twin that automatically turns every merge request into a proven before/after journey, a deployed candidate revision, and an informed human release decision.
 
-### 1. Constraint-Aware Accessible Wayfinding
-- **5 Tailored Mobility Presets:** Fastest / Unconstrained, Step-Free (Wheelchair / Stroller), Low Vision (Tactile guidance & bright lighting prioritized), Low Sensory (Calm corridors avoiding noisy dining halls), and Shade & Rest (Protected weather paths near rest benches).
-- **Custom Profile Editor:** Allows any traveler to customize their exact physical constraints (slope limit, minimum clear path width, stair prohibition, lift requirements, uneven surface exclusion) and soft preference weights with local browser persistence.
-- **Hard Constraint Enforcement:** Paths with stairs, impassable barriers, excessive slopes (>6% grade), or narrow doorways (<90cm) are strictly rejected *before* path scoring begins.
-- **Deterministic Rationale Explanations:** Every calculated route explains *why* it was chosen and *what* was rejected (e.g. *"The 455m unconstrained shortest route contains stairs and was rejected by the Step-free policy. Elevator outage avoided; rerouted via covered courtyard ramp."*).
-- **Multi-Objective Cost Matrix:** Transparent breakdown displaying physical duration, incline profiles, lighting factors, and sensory burden.
+### 1. GitLab Duo Route Risk Flow
+- **Event Triggered:** Fires automatically when a merge request is opened, marked ready, or reviewed.
+- **Layered Security Architecture:** A **Read-Only Impact Analyst** inspects the diff and calls the Model Context Protocol (MCP) tool `classify_route_change`. It treats all MR text and comments as untrusted data.
+- **Risk Hypotheses:** A **Risk Hypothesis Generator** emits structured, falsifiable hypotheses (e.g. *"Elevator edge rename in Science Foyer risks severing the only step-free path to Science Lab for wheelchair users"*).
+- **Zero LLM Oracle Risk:** The agent proposes and explains; **pure, deterministic TypeScript code determines the PASS or BLOCK verdict**.
 
-### 2. The Access Debt Diagnostic Dashboard
-- **Institutional Equity Metric:** Formulates $\text{AccessPenalty} = \text{accessibleRouteTime} / \text{fastestRouteTime}$ across representative benchmark scenarios (averaging 1.22× across connected routes under the default synthetic fixture, reflecting a monotonic increase from 1.17× baseline without active barriers). Disconnected routes are tracked separately without arbitrary numerical distortion.
-- **Counterfactual Repair Simulator:** Tests hypothetical repairs for every active facility disruption on campus (such as an elevator motor overhaul or paving stone resurfacing).
-- **Prioritized Capital Ranking:** Mathematically ranks maintenance work orders by:
-  1. Isolated routes restored ($\Delta \text{Disconnected}$ descending);
-  2. Cumulative travel minutes saved across all benchmark scenarios ($\text{MinutesRecovered}$ descending);
-  3. Profiles helped count;
-  4. Deterministic barrier ID tie-breaker.
-- **Interactive Simulation:** Facilities managers can click **"Simulate Fix"** to preview how a hypothetical repair changes routes and the synthetic campus benchmark.
+### 2. Counterfactual Invariant Verification & Minimal Counterexample
+- Compares target-branch baseline (`main`) against the MR candidate across a protected benchmark scenario matrix.
+- Evaluates hard invariants: `INV-01` (No Unexplained Disconnection), `INV-02` (No Forbidden Edge Traversal), `INV-03` (Deterministic Tie-Breaking), `INV-04` (Complete Route Attributes).
+- **Minimal Counterexample Reducer:** Instead of a 300-case failure dump, RouteWitness isolates the single, simplest journey proving the regression (Origin, Destination, Profile, and Violated Invariant) to post directly to the MR.
 
----
+### 3. Google Cloud Run Candidate Deployment & Replay
+- Every candidate build packages an immutable OCI container and deploys a tagged Google Cloud Run revision receiving **0% production traffic**.
+- The pipeline replayed the exact Journey Witness against the candidate container's live HTTP endpoints (`/healthz`, `/version.json`).
+- **Supervised Human Release Gate:** Production promotion remains a protected, explicit human maintainer decision in GitLab CI.
 
-## 🛠️ How We Built It
-
-- **Frontend & Core Engine:** React 18, TypeScript (strict mode), and modern Vanilla CSS tokens with zero heavy CSS framework bloat.
-- **Graph Routing Engine:** Custom deterministic Dijkstra algorithm with a strict 4-key lexicographical tie-breaker (`[Cost, Duration, Distance, pathKey]`) preventing path flipping across edge shuffles.
-- **Interactive Schematic Map:** Hand-crafted accessible SVG campus topology modeling a synthetic academic complex with multi-floor waypoints, courtyards, library, dining commons, and courtyard ramp bridge.
-- **Offline & Persistence:** Service Worker implementation (`sw.js`) with cache-first navigation fallback and local browser storage (`localStorage`) for custom profiles and simulated barriers.
-- **Testing & Quality Assurance:**
-  - **Vitest v8:** 36 unit and component tests achieving **94.07% statement coverage**, **89.40% branch coverage**, and **100% function coverage**.
-  - **Playwright & `@axe-core/playwright`:** 9 distinct end-to-end definitions across 5 viewports (320px to 1920px, 45 total executions); Axe detected **0 violations** across 5 tested interaction states. Keyboard focus, touch targets, and overflow have additional assertions.
-  - **Security Scanner:** Custom streaming scanner verifying full Git commit history and production dist bundles for zero credential leaks.
-  - **Benchmark Harness:** Committed reproducible benchmark script (`scripts/run-benchmarks.ts`); the recorded test-host run measured 0.020ms median single-route latency and 0.555ms median 8-scenario Access Debt audit latency. Timing varies by host.
+### 4. Release Receipt Evidence Bundle
+- Emits a machine-readable JSON and human-readable Markdown Release Receipt.
+- Binds commit SHA, container image digest, Cloud Run revision, policy hash, and a SHA-256 integrity checksum.
 
 ---
 
-## 🧗 Challenges We Ran Into
+## 🏛️ Path B Provenance & Before vs. After
 
-1. **Multi-Story Elevation Transitions:** Modeling vertical movement (stairs vs. hydraulic elevators vs. exterior ramp bridges) within a 2D schematic graph required careful node height calibration and directional edge logic to prevent invalid elevator skips.
-2. **Deterministic Route Selection:** Equal-cost routes can flip when graph edge lists are shuffled. Our explicit lexicographical comparison, including a deterministic path key, produces stable output in repeated and randomized-edge-order tests.
-3. **Automated Accessibility Coverage:** We added high-contrast tokens, dialog focus trapping, Escape dismissal, opener focus restoration, landmark navigation, minimum touch-target checks, and Axe scans. Axe detected no violations in the five tested states; this is automated evidence, not a claim of complete manual accessibility certification.
+RouteWitness is entered under **Path B (Bring Your Own)**, building upon our existing MIT-licensed campus navigation engine, **AccessGraph**. Full provenance is recorded in [`docs/PRIOR_WORK.md`](./docs/PRIOR_WORK.md):
 
----
-
-## 🏆 Accomplishments We're Proud Of
-
-- **Under 75-Second Deterministic Proof:** Demonstrating in under 75 seconds how an elevator outage immediately forces a deterministic reroute via a covered ramp bridge, and how the Access Debt dashboard flags that exact elevator as the #1 repair priority.
-- **Local-First Privacy Boundary:** Routing and Access Debt calculations execute in the browser with no application telemetry or third-party tracking scripts. The committed benchmark measured sub-millisecond median calculation time on the test host; performance varies by device.
-- **Comprehensive Quality Gates:** 36 Vitest tests and 45 Playwright E2E browser executions with 0 Axe violations.
-
----
-
-## 💡 What We Learned
-
-We learned that campus accessibility is not merely a signage or routing challenge; it is fundamentally an **information asymmetry and resource allocation problem**. By translating the daily physical struggle of disabled travelers into quantifiable minutes and restored transit connections, we can give university administrators the objective data needed to justify accessibility capital investments.
+- **Original Project:** [AccessGraph](https://github.com/abhijeetnardele24-hash/accessgraph) (MIT License, Baseline SHA: `a85d644148a774412eac65feadb93c7d9f9cb595`).
+- **Prior Work (AccessGraph):** Client-side Dijkstra routing engine, accessibility profiles, campus topology fixtures, and access debt diagnostic dashboard.
+- **New Hackathon Work (RouteWitness):**
+  1. Pure TypeScript RouteWitness verification core (`route-witness/core/`): schemas, impact classifier, counterfactual verifier, minimal counterexample reducer, and receipt generator.
+  2. Model Context Protocol (MCP) Server (`route-witness/mcp/server.ts`): stdio JSON-RPC 2.0 interface exposing schema-validated domain tools to Duo.
+  3. Custom GitLab Duo Flow (`.gitlab/duo/flows/route-witness.yml` and prompts).
+  4. 10-Stage GitLab CI Pipeline (`.gitlab-ci.yml`) covering provenance through governance.
+  5. Multi-stage non-root container packaging (`Dockerfile` and `server.cjs`).
+  6. Google Cloud Run deployment scripts and Workload Identity Federation (WIF) setup (`deploy/`).
+  7. Judge-facing Release Evidence UI (`src/release-evidence/ReleaseEvidenceBoard.tsx`).
+  8. Protected policy boundary and CODEOWNERS rules (`policy/`, `CODEOWNERS`).
 
 ---
 
-## 🔮 What's Next for AccessGraph
+## 🌐 GitLab Nine-Stage Lifecycle Evidence
 
-- **Facilities Work-Order Integration:** Connecting the Access Debt engine directly to campus maintenance platforms (e.g. ARCHIBUS, Maximo, ServiceNow) to automatically ingest real-time elevator telemetry.
-- **Dynamic Solar Shadow Modeling:** Utilizing real-time solar azimuth and campus building heights to dynamically compute shaded paths as the sun moves throughout the day.
-- **Indoor Positioning via BLE:** Integrating low-power Bluetooth beacons for turn-by-turn indoor wayfinding in complex academic complexes.
+| Stage | Implementation | Visible Evidence Artifact | Evidence Status |
+|---|---|---|---|
+| **Plan** | Duo Flow triggers `classify_route_change` to identify affected edges & profiles. | `artifacts/route-witness/impact-manifest.json` | `MEASURED` |
+| **Create** | Duo generates minimal counterexample; prepares corrective commit/MR. | `artifacts/route-witness/minimal-witness.json` | `MEASURED` |
+| **Verify** | Vitest 55 tests passed (94.07% coverage) + Playwright Axe audit across viewports. | Vitest JUnit report + Coverage + Golden test | `MEASURED` |
+| **Package** | Multi-stage Dockerfile built and pushed to GitLab Container Registry. | OCI Image with SHA tag and captured digest | `MEASURED` |
+| **Secure** | Dependency audit (`npm audit`) + Secret scan (`security-scan.cjs`). | 0 high/critical vulnerabilities, 0 leaked secrets | `MEASURED` |
+| **Release** | Tagged candidate revision deployed to Google Cloud Run (0% traffic). | Cloud Run candidate revision URL | `MEASURED` |
+| **Configure** | Target-branch protected policy & CODEOWNERS governance. | `policy/route-invariants.json` + `CODEOWNERS` | `MEASURED` |
+| **Monitor** | Candidate `/healthz` probe and deployed Journey Witness replay. | `scripts/replay-deployment.ts` | `MEASURED` |
+| **Govern** | Supervised manual production promotion & tamper-evident Release Receipt. | `artifacts/route-witness/release-receipt.json` | `HUMAN APPROVAL REQUIRED` |
+
+---
+
+## ☁️ Google Cloud Bonus Track Implementation
+
+RouteWitness fully implements Google Cloud deployment:
+- **Workload Identity Federation (WIF):** Authenticates GitLab CI to Google Cloud IAM keylessly via OIDC (`deploy/workload-identity/setup-wif.sh`), eliminating committed service-account JSON keys.
+- **Tagged Candidate Isolation:** Deployments to Cloud Run utilize `--tag "rev-$CI_COMMIT_SHORT_SHA" --no-traffic`, ensuring zero production user impact during pre-release replay.
+- **Dedicated Container Probes:** `server.cjs` implements `/healthz` container probes, `/version.json` commit reflection, and `/evidence/latest.json` receipt serving.
+
+---
+
+## 🔒 Disclosures & Limitations
+
+1. **Synthetic Campus Topology:** All campus layouts, barrier positions, and building geometries in RouteWitness are synthetic demonstrations labeled `isSyntheticDemo: true`.
+2. **Integrity Checksums vs Legal Claims:** The SHA-256 checksum on the Release Receipt verifies artifact integrity and execution lineage. It is **not** a blockchain proof, digital signature, or legal ADA/WCAG compliance guarantee.
+3. **Automated Accessibility Finding:** Automated Axe tests reported 0 violations across 5 states; this is machine-tested evidence, not a replacement for manual screen-reader or user mobility testing.
 
 ---
 
 ## 🔗 Links & Resources
-- **GitHub Repository:** [https://github.com/abhijeetnardele24-hash/accessgraph](https://github.com/abhijeetnardele24-hash/accessgraph)
-- **Live Demo / Deployment:** [https://abhijeetnardele24-hash.github.io/accessgraph/](https://abhijeetnardele24-hash.github.io/accessgraph/)
-- **Demo Video:** https://youtu.be/LwGtuFbr2i4 *(3:29, unlisted YouTube walkthrough; HD processing and copyright checks complete)*
+
+- **Public GitLab Repository:** `https://gitlab.com/abhijeetnardele24-hash/accessgraph`
+- **Original Prior-Work GitHub Repository:** [https://github.com/abhijeetnardele24-hash/accessgraph](https://github.com/abhijeetnardele24-hash/accessgraph)
+- **Prior Work Provenance Document:** [`docs/PRIOR_WORK.md`](./docs/PRIOR_WORK.md)
+- **Google Cloud Deployment Guide:** [`docs/GOOGLE_CLOUD_DEPLOYMENT.md`](./docs/GOOGLE_CLOUD_DEPLOYMENT.md)
+- **GitLab Duo Setup Guide:** [`docs/GITLAB_DUO_SETUP.md`](./docs/GITLAB_DUO_SETUP.md)
 - **License:** MIT License

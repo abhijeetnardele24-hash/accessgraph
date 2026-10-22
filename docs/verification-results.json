@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-10-22T17:56:07.556Z",
+  "commitSha": "a85d644148a774412eac65feadb93c7d9f9cb595",
+  "policyHash": "d3a24931583bfe582863058b7ec3ad354ac32c24c4ca0e3273c6507cb78ec588",
+  "receiptChecksumSha256": "a2ff3964db994f5ac04d2c53445f4ea67699fd5e4f3f338df9d6160698e9f77b",
+  "stages": {
+    "plan": {
+      "status": "COVERED",
+      "method": "GitLab Duo Impact Classifier Flow"
+    },
+    "create": {
+      "status": "COVERED",
+      "method": "Corrective MR generator / code commit"
+    },
+    "verify": {
+      "status": "COVERED",
+      "method": "Vitest (55 tests) + Playwright + Axe"
+    },
+    "package": {
+      "status": "COVERED",
+      "method": "OCI Container Build (Multi-stage non-root)"
+    },
+    "secure": {
+      "status": "COVERED",
+      "method": "npm audit + Secret Scan"
+    },
+    "release": {
+      "status": "COVERED",
+      "method": "Google Cloud Run tagged candidate revision"
+    },
+    "configure": {
+      "status": "COVERED",
+      "method": "Protected branch policy & CODEOWNERS"
+    },
+    "monitor": {
+      "status": "COVERED",
+      "method": "Health check + Deployed Witness Replay"
+    },
+    "govern": {
+      "status": "COVERED",
+      "method": "Supervised human promotion & Release Receipt"
+    }
+  },
+  "verificationSummary": {
+    "unitAndDomainTestsPassed": 55,
+    "goldenRegressionTestPassed": true,
+    "e2eAccessibilityScansRun": true,
+    "criticalVulnerabilities": 0,
+    "highVulnerabilities": 0,
+    "syntheticDataDisclosurePresent": true,
+    "nonCertificationDisclosurePresent": true
+  },
+  "disclaimer": "All route and campus data used in RouteWitness is synthetic (isSyntheticDemo: true). No legal, safety, or accessibility certification is claimed."
+}

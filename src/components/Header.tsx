@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Compass, BarChart2, Github, Wifi, WifiOff } from "lucide-react";
+import { Compass, BarChart2, ShieldCheck, Github, Wifi, WifiOff } from "lucide-react";
 
 interface HeaderProps {
-  currentTab: "planner" | "access_debt";
-  onTabChange: (tab: "planner" | "access_debt") => void;
+  currentTab: "planner" | "access_debt" | "release_evidence";
+  onTabChange: (tab: "planner" | "access_debt" | "release_evidence") => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
@@ -75,6 +75,15 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
         >
           <BarChart2 size={17} aria-hidden="true" />
           <span>Access Debt Diagnostic</span>
+        </button>
+
+        <button
+          className={`nav-tab-btn ${currentTab === "release_evidence" ? "active" : ""}`}
+          onClick={() => onTabChange("release_evidence")}
+          aria-current={currentTab === "release_evidence" ? "page" : undefined}
+        >
+          <ShieldCheck size={17} aria-hidden="true" />
+          <span>Release Evidence</span>
         </button>
 
         <a

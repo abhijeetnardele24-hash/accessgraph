@@ -1,0 +1,8 @@
+# RouteWitness Codeowners
+# Protect critical release gates, policy invariants, and agent instructions
+
+policy/ @maintainers
+.gitlab/ @maintainers
+.gitlab-ci.yml @maintainers
+AGENTS.md @maintainers
+route-witness/core/ @maintainers

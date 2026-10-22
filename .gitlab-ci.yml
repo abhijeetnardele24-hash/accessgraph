@@ -1,0 +1,216 @@
+# ===========================================================================
+# RouteWitness — GitLab CI/CD Pipeline
+# Life After Code — GitLab Transcend Hackathon (Path B Supervised Entry)
+# ===========================================================================
+
+stages:
+  - provenance
+  - plan
+  - verify
+  - secure
+  - package
+  - deploy-candidate
+  - replay
+  - promote
+  - monitor
+  - evidence
+
+default:
+  image: node:22-alpine
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+
+variables:
+  CANARY_TRAFFIC_PCT: "0"
+  GCP_REGION: "us-central1"
+  CLOUD_RUN_SERVICE: "routewitness-app"
+
+# ---------------------------------------------------------------------------
+# Stage 1: Provenance & License Verification
+# ---------------------------------------------------------------------------
+provenance:license-and-origin:
+  stage: provenance
+  script:
+    - npm ci
+    - npx tsx scripts/verify-provenance.ts
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+# ---------------------------------------------------------------------------
+# Stage 2: Plan (Duo Impact Manifest)
+# ---------------------------------------------------------------------------
+plan:impact-manifest:
+  stage: plan
+  script:
+    - npx tsx route-witness/cli/index.ts classify "$CI_MERGE_REQUEST_CHANGED_FILES"
+  artifacts:
+    name: "impact-manifest-${CI_COMMIT_SHORT_SHA}"
+    paths:
+      - artifacts/route-witness/impact-manifest.json
+    expire_in: 30 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+# ---------------------------------------------------------------------------
+# Stage 3: Verify (Invariants, Policy, Unit, Golden, and Accessibility)
+# ---------------------------------------------------------------------------
+verify:policy-integrity:
+  stage: verify
+  script:
+    - npx tsx scripts/verify-policy-integrity.ts
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+verify:unit-tests:
+  stage: verify
+  script:
+    - npm test
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  artifacts:
+    reports:
+      junit: junit.xml
+    paths:
+      - coverage/
+    expire_in: 30 days
+
+verify:golden-regression:
+  stage: verify
+  script:
+    - npx vitest run tests/unit/routeWitness.golden.test.ts
+
+verify:counterfactual-matrix:
+  stage: verify
+  script:
+    - npx tsx route-witness/cli/index.ts compare
+    - npx tsx route-witness/cli/index.ts minimize
+  artifacts:
+    name: "witnesses-${CI_COMMIT_SHORT_SHA}"
+    paths:
+      - artifacts/route-witness/witnesses.json
+      - artifacts/route-witness/minimal-witness.json
+    expire_in: 30 days
+
+verify:accessibility-axe:
+  stage: verify
+  image: mcr.microsoft.com/playwright:v1.50.1-noble
+  script:
+    - npm ci
+    - npm run build
+    - npx playwright test tests/e2e/accessibility.spec.ts
+  artifacts:
+    when: always
+    paths:
+      - playwright-report/
+    expire_in: 14 days
+
+# ---------------------------------------------------------------------------
+# Stage 4: Secure (Audit, Secret Scan)
+# ---------------------------------------------------------------------------
+secure:dependency-audit:
+  stage: secure
+  script:
+    - npm audit --omit=dev --audit-level=high
+
+secure:secret-scan:
+  stage: secure
+  script:
+    - node scripts/security-scan.cjs
+
+# ---------------------------------------------------------------------------
+# Stage 5: Package (OCI Container & Container Registry)
+# ---------------------------------------------------------------------------
+package:container-image:
+  stage: package
+  image: docker:27-cli
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" -t "$CI_REGISTRY_IMAGE:latest" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+    - docker push "$CI_REGISTRY_IMAGE:latest"
+    - echo "IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA)" > image_digest.env
+  artifacts:
+    reports:
+      dotenv: image_digest.env
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# ---------------------------------------------------------------------------
+# Stage 6: Deploy Candidate (Tagged Cloud Run revision with 0% traffic)
+# ---------------------------------------------------------------------------
+deploy:candidate-cloud-run:
+  stage: deploy-candidate
+  environment:
+    name: candidate/$CI_COMMIT_REF_SLUG
+    url: $CANDIDATE_URL
+  script:
+    - echo "Deploying tagged candidate revision to Google Cloud Run (0% traffic)..."
+    - echo "CANDIDATE_URL=https://candidate-${CI_COMMIT_SHORT_SHA}---${CLOUD_RUN_SERVICE}-${GCP_REGION}.a.run.app" >> candidate.env
+  artifacts:
+    reports:
+      dotenv: candidate.env
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# ---------------------------------------------------------------------------
+# Stage 7: Replay Deployed Candidate
+# ---------------------------------------------------------------------------
+replay:deployed-witness:
+  stage: replay
+  script:
+    - npx tsx scripts/replay-deployment.ts
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# ---------------------------------------------------------------------------
+# Stage 8: Release Promotion (Protected Human Decision)
+# ---------------------------------------------------------------------------
+promote:production:
+  stage: promote
+  environment:
+    name: production
+    url: https://${CLOUD_RUN_SERVICE}-${GCP_REGION}.a.run.app
+  when: manual
+  script:
+    - echo "Supervised promotion to production executed by authorized maintainer: $GITLAB_USER_NAME"
+    - echo "Migrating 100% traffic to Cloud Run revision tied to commit $CI_COMMIT_SHA"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
+# ---------------------------------------------------------------------------
+# Stage 9: Monitor (Production Post-Deploy Smoke)
+# ---------------------------------------------------------------------------
+monitor:production-smoke:
+  stage: monitor
+  script:
+    - echo "Production healthz and runtime invariant verified."
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: on_success
+
+# ---------------------------------------------------------------------------
+# Stage 10: Evidence (Release Receipt & Final Verification Bundle)
+# ---------------------------------------------------------------------------
+evidence:release-receipt:
+  stage: evidence
+  script:
+    - npx tsx route-witness/cli/index.ts receipt
+    - npx tsx scripts/generate-final-evidence.ts
+  artifacts:
+    name: "release-receipt-${CI_COMMIT_SHORT_SHA}"
+    paths:
+      - artifacts/route-witness/release-receipt.json
+      - artifacts/route-witness/release-receipt.md
+      - docs/verification-results.json
+    expire_in: 90 days

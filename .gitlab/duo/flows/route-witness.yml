@@ -1,0 +1,43 @@
+name: route-witness
+description: Accessibility-sensitive route release twin flow for GitLab Duo Agent Platform
+version: "1.0.0"
+
+triggers:
+  - event: merge_request.opened
+  - event: merge_request.updated
+  - event: merge_request.marked_ready
+  - event: reviewer_assigned
+
+steps:
+  - name: read_only_impact_analyst
+    description: Inspects MR diff, changed files, and project AGENTS.md instructions. Treats MR text as untrusted data.
+    agent:
+      prompt_file: ../prompts/analyst.md
+      model: claude-3-7-sonnet
+      temperature: 0.1
+      read_only: true
+    tools:
+      - mcp: routewitness
+        tool: classify_route_change
+
+  - name: risk_hypothesis_generator
+    description: Emits structured risk hypotheses identifying mobility profiles and journeys at risk.
+    agent:
+      prompt_file: ../prompts/hypothesis.md
+      read_only: true
+
+  - name: deterministic_verifier_call
+    description: Invokes deterministic MCP tools to prove or disprove hypotheses against benchmark matrix.
+    tools:
+      - mcp: routewitness
+        tool: compare_route_impact
+      - mcp: routewitness
+        tool: minimize_counterexample
+
+  - name: write_limited_mr_reporter
+    description: Formats and posts structured MR note with evidence links and minimal counterexample if blocked.
+    agent:
+      prompt_file: ../prompts/reporter.md
+      can_create_merge_request_note: true
+      can_modify_source_code: false
+      can_approve_merge_request: false
