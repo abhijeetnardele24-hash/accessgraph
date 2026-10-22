@@ -3,16 +3,16 @@
   "generatorVersion": "1.0.0",
   "evidenceScope": "local_verification_snapshot",
   "authoritativePipelineNotice": "Authoritative evidence is generated in GitLab CI for exact CI_COMMIT_SHA and exported as pipeline artifact evidence-$CI_COMMIT_SHORT_SHA. This file is a source-controlled local snapshot.",
-  "generatedAt": "2026-10-22T19:05:20.063Z",
-  "commitSha": "7764db519ccad31263e76eac39b98f490db12a07",
-  "baselineSha": "b328e248a8591470155b7c3c2a303543a05ac3b3",
+  "generatedAt": "2026-10-22T19:05:49.713Z",
+  "commitSha": "cb88d45b4744ec461476a48ec2707044e9afc111",
+  "baselineSha": "7764db519ccad31263e76eac39b98f490db12a07",
   "policyHash": "8255faa15a8078e85c6b4727b3c3ef56f1b41d6e41a3a7e7e06b343e893139f4",
   "baselineTag": {
     "name": "pre-routewitness-baseline",
     "valid": true,
     "targetSha": "a85d644148a774412eac65feadb93c7d9f9cb595"
   },
-  "receiptChecksumSha256": "476d9f72eb6347a6eb182e025ff07dd883250679bbf169a74540d5edcbf48d87",
+  "receiptChecksumSha256": "ab31aa036f708be270530ec46dab0c3dd2786225515651ae4a6967a77786e7dd",
   "pipelineUrl": "NOT_MEASURED",
   "cloudRun": {
     "revision": "NOT_MEASURED",
