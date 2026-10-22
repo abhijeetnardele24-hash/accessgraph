@@ -42,7 +42,10 @@ export function resolveRefs(opts?: { baselineRef?: string; candidateRef?: string
   // Resolve symbolic ref (e.g. HEAD, branch name) to 40-char hex
   if (!SHA_REGEX.test(candidateSha)) {
     try {
-      candidateSha = execSync(`git rev-parse ${candidateSha}`, { encoding: "utf8" }).trim();
+      candidateSha = execSync(`git rev-parse ${candidateSha}`, {
+        encoding: "utf8",
+        stdio: ["pipe", "pipe", "pipe"],
+      }).trim();
     } catch (e: any) {
       throw new Error(`[Loader] Invalid candidate ref '${candidateSha}': cannot resolve to commit SHA.`);
     }
@@ -86,7 +89,10 @@ export function resolveRefs(opts?: { baselineRef?: string; candidateRef?: string
 
   if (baselineSha && !SHA_REGEX.test(baselineSha)) {
     try {
-      baselineSha = execSync(`git rev-parse ${baselineSha}`, { encoding: "utf8" }).trim();
+      baselineSha = execSync(`git rev-parse ${baselineSha}`, {
+        encoding: "utf8",
+        stdio: ["pipe", "pipe", "pipe"],
+      }).trim();
     } catch (e: any) {
       throw new Error(`[Loader] Invalid baseline ref '${baselineSha}': cannot resolve to commit SHA.`);
     }
@@ -191,6 +197,7 @@ export function loadDatasetFromRef(ref: string): CampusDataset {
   try {
     rawContent = execSync(`git show ${ref}:src/data/demoCampus.ts`, {
       encoding: "utf8",
+      stdio: ["pipe", "pipe", "pipe"],
     });
   } catch (err: any) {
     throw new Error(`[Loader] Failed to extract campus dataset from ref '${ref}': ${err.message}`);

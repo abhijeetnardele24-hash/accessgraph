@@ -103,6 +103,91 @@ describe("MR Comparison — RouteWitness Verification Gate", () => {
       expect(result.blockCount).toBe(0);
       expect(result.passCount).toBe(REGRESSION_SCENARIOS.length);
     });
+
+    it("verifies all four baseline/candidate connectivity combinations", () => {
+      const testScenario = {
+        id: "scenario_connectivity_matrix_test",
+        description: "Test scenario for connectivity combinations",
+        originId: "node_gate",
+        destinationId: "node_sci_lab",
+        profileId: "step_free",
+        activeBarrierIds: [],
+        invariantId: "INV-01",
+        invariantDescription: "Test invariant",
+        requiresConnected: true,
+      };
+
+      // Combination 1: Baseline connected, Candidate connected -> PASS
+      const res1 = compareRouteImpact({
+        baselineSha: VALID_SHA_1,
+        candidateSha: VALID_SHA_2,
+        baselineDataset: BASELINE_DATASET,
+        candidateDataset: BASELINE_DATASET,
+        profiles: profilesMap,
+        scenarios: [testScenario],
+        policyHash: "test-hash",
+        fixtureVersion: "1.0.0",
+      });
+      expect(res1.witnesses[0].verdict).toBe("PASS");
+      expect(res1.witnesses[0].verdictReason).toContain("Both baseline and candidate are connected");
+
+      // Combination 2: Baseline connected, Candidate disconnected -> BLOCK (Regression)
+      const res2 = compareRouteImpact({
+        baselineSha: VALID_SHA_1,
+        candidateSha: VALID_SHA_2,
+        baselineDataset: BASELINE_DATASET,
+        candidateDataset: CANDIDATE_DATASET,
+        profiles: profilesMap,
+        scenarios: [testScenario],
+        policyHash: "test-hash",
+        fixtureVersion: "1.0.0",
+      });
+      expect(res2.witnesses[0].verdict).toBe("BLOCK");
+      expect(res2.witnesses[0].verdictReason).toContain("Regression detected");
+
+      // Combination 3: Baseline disconnected, Candidate connected -> PASS (Restoration)
+      const res3 = compareRouteImpact({
+        baselineSha: VALID_SHA_1,
+        candidateSha: VALID_SHA_2,
+        baselineDataset: CANDIDATE_DATASET,
+        candidateDataset: BASELINE_DATASET,
+        profiles: profilesMap,
+        scenarios: [testScenario],
+        policyHash: "test-hash",
+        fixtureVersion: "1.0.0",
+      });
+      expect(res3.witnesses[0].verdict).toBe("PASS");
+      expect(res3.witnesses[0].verdictReason).toContain("Candidate improves connectivity");
+
+      // Combination 4: Baseline disconnected, Candidate disconnected (requiresConnected: true) -> BLOCK (Pre-existing failure)
+      const res4 = compareRouteImpact({
+        baselineSha: VALID_SHA_1,
+        candidateSha: VALID_SHA_2,
+        baselineDataset: CANDIDATE_DATASET,
+        candidateDataset: CANDIDATE_DATASET,
+        profiles: profilesMap,
+        scenarios: [testScenario],
+        policyHash: "test-hash",
+        fixtureVersion: "1.0.0",
+      });
+      expect(res4.witnesses[0].verdict).toBe("BLOCK");
+      expect(res4.witnesses[0].verdictReason).toContain("Pre-existing failure");
+      expect(res4.witnesses[0].verdictReason).not.toContain("Invariant satisfied");
+
+      // Combination 4b: Baseline disconnected, Candidate disconnected (requiresConnected: false) -> PASS (Informational)
+      const res4b = compareRouteImpact({
+        baselineSha: VALID_SHA_1,
+        candidateSha: VALID_SHA_2,
+        baselineDataset: CANDIDATE_DATASET,
+        candidateDataset: CANDIDATE_DATASET,
+        profiles: profilesMap,
+        scenarios: [{ ...testScenario, requiresConnected: false }],
+        policyHash: "test-hash",
+        fixtureVersion: "1.0.0",
+      });
+      expect(res4b.witnesses[0].verdict).toBe("PASS");
+      expect(res4b.witnesses[0].verdictReason).toContain("Connectivity not mandated");
+    });
   });
 
   describe("3. Strict Fail-Closed Ref Resolution & Dataset Extraction", () => {

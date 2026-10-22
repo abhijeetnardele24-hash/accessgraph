@@ -85,12 +85,14 @@ describe("RouteWitness MCP Server — Security & Boundary Enforcement", () => {
     });
 
     it("rejects invalid URL in RenderReceiptToolInputSchema", () => {
-      expect(() => {
-        RenderReceiptToolInputSchema.parse({
-          commitSha: VALID_SHA_1,
-          candidateUrl: "not-a-url-scheme",
-        });
-      }).toThrow(/Invalid url/);
+      const parsed = RenderReceiptToolInputSchema.safeParse({
+        commitSha: VALID_SHA_1,
+        candidateUrl: "not-a-url-scheme",
+      });
+      expect(parsed.success).toBe(false);
+      if (!parsed.success) {
+        expect(parsed.error.issues[0].path).toContain("candidateUrl");
+      }
     });
 
     it("rejects oversized payloads (array over 500 items)", () => {

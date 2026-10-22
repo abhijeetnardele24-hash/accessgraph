@@ -228,8 +228,23 @@ async function runReceipt() {
   writeFileSync(jsonPath, JSON.stringify(receipt, null, 2), "utf8");
   writeFileSync(mdPath, renderReceiptMarkdown(receipt), "utf8");
 
+  const publicEvidenceDir = resolve(process.cwd(), "public/evidence");
+  if (!existsSync(publicEvidenceDir)) {
+    mkdirSync(publicEvidenceDir, { recursive: true });
+  }
+  writeFileSync(resolve(publicEvidenceDir, "latest.json"), JSON.stringify(receipt, null, 2), "utf8");
+
+  const distEvidenceDir = resolve(process.cwd(), "dist/evidence");
+  if (existsSync(resolve(process.cwd(), "dist"))) {
+    if (!existsSync(distEvidenceDir)) {
+      mkdirSync(distEvidenceDir, { recursive: true });
+    }
+    writeFileSync(resolve(distEvidenceDir, "latest.json"), JSON.stringify(receipt, null, 2), "utf8");
+  }
+
   console.log(`[RouteWitness] Release receipt JSON written to: ${jsonPath}`);
   console.log(`[RouteWitness] Release receipt Markdown written to: ${mdPath}`);
+  console.log(`[RouteWitness] Public release receipt synced to: ${resolve(publicEvidenceDir, "latest.json")}`);
   console.log(`[RouteWitness] Integrity SHA-256 Checksum: ${receipt.checksumSha256}`);
 }
 

@@ -176,22 +176,22 @@ export function compareRouteImpact(opts: CompareOptions): CompareResult {
     if (scenario.requiresConnected) {
       if (baselineOutcome.connected && !candidateOutcome.connected) {
         verdict = "BLOCK";
-        verdictReason = `Invariant violated: baseline route from '${scenario.originId}' to '${scenario.destinationId}' under profile '${scenario.profileId}' was CONNECTED; candidate is DISCONNECTED. The candidate removes the only viable journey for this profile. This is a regression.`;
+        verdictReason = `Regression detected: baseline route from '${scenario.originId}' to '${scenario.destinationId}' under profile '${scenario.profileId}' was CONNECTED; candidate is DISCONNECTED. Invariant violated.`;
       } else if (!baselineOutcome.connected && candidateOutcome.connected) {
         verdict = "PASS";
-        verdictReason = `Candidate improves connectivity: baseline was disconnected, candidate is now connected for profile '${scenario.profileId}'.`;
+        verdictReason = `Candidate improves connectivity: baseline was disconnected, candidate is now connected for profile '${scenario.profileId}'. Invariant satisfied.`;
       } else if (baselineOutcome.connected && candidateOutcome.connected) {
         verdict = "PASS";
         verdictReason = `Both baseline and candidate are connected for profile '${scenario.profileId}'. Invariant satisfied.`;
       } else {
-        // Both disconnected
-        verdict = "PASS";
-        verdictReason = `Both baseline and candidate are disconnected for profile '${scenario.profileId}'. No regression introduced.`;
+        // Both disconnected when requiresConnected is true:
+        verdict = "BLOCK";
+        verdictReason = `Pre-existing failure: required connectivity invariant '${scenario.invariantId}' is NOT satisfied. Both baseline and candidate are disconnected for profile '${scenario.profileId}'. Journey remains unviable and cannot pass release gates.`;
       }
     } else {
-      // For non-connectivity invariants, compare presence of route
+      // For scenarios that do not mandate connectivity (informational / cost-comparison only)
       verdict = "PASS";
-      verdictReason = `No connectivity invariant required for scenario '${scenario.id}'.`;
+      verdictReason = `Connectivity not mandated for scenario '${scenario.id}'. Invariant verified.`;
     }
 
     witnesses.push({

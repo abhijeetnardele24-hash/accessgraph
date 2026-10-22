@@ -1,16 +1,18 @@
 {
   "schemaVersion": "1.0.0",
   "generatorVersion": "1.0.0",
-  "generatedAt": "2026-10-22T18:30:20.504Z",
-  "commitSha": "b328e248a8591470155b7c3c2a303543a05ac3b3",
-  "baselineSha": "564842304abd456dfd22ab786c4635fb0b8183c7",
-  "policyHash": "d3a24931583bfe582863058b7ec3ad354ac32c24c4ca0e3273c6507cb78ec588",
+  "evidenceScope": "local_verification_snapshot",
+  "authoritativePipelineNotice": "Authoritative evidence is generated in GitLab CI for exact CI_COMMIT_SHA and exported as pipeline artifact evidence-$CI_COMMIT_SHORT_SHA. This file is a source-controlled local snapshot.",
+  "generatedAt": "2026-10-22T19:05:20.063Z",
+  "commitSha": "7764db519ccad31263e76eac39b98f490db12a07",
+  "baselineSha": "b328e248a8591470155b7c3c2a303543a05ac3b3",
+  "policyHash": "8255faa15a8078e85c6b4727b3c3ef56f1b41d6e41a3a7e7e06b343e893139f4",
   "baselineTag": {
     "name": "pre-routewitness-baseline",
     "valid": true,
     "targetSha": "a85d644148a774412eac65feadb93c7d9f9cb595"
   },
-  "receiptChecksumSha256": "1774f0558287c80f9fdd9042ef4a4e3186c30b5c2fe7dda21d8dc505e2883d35",
+  "receiptChecksumSha256": "476d9f72eb6347a6eb182e025ff07dd883250679bbf169a74540d5edcbf48d87",
   "pipelineUrl": "NOT_MEASURED",
   "cloudRun": {
     "revision": "NOT_MEASURED",
@@ -40,7 +42,7 @@
       "stage": "verify",
       "status": "COVERED",
       "evidenceStatus": "MEASURED",
-      "method": "Vitest (72 tests passed, coverage 82.13%) + Axe accessibility",
+      "method": "Vitest (83 tests passed, coverage 82.31%) + Playwright Axe accessibility",
       "artifact": "junit.xml"
     },
     "package": {
@@ -54,7 +56,7 @@
       "stage": "secure",
       "status": "COVERED",
       "evidenceStatus": "MEASURED",
-      "method": "Secret scan (0 violations) + npm audit",
+      "method": "Secret scan (0 violations) + npm audit (0 high/critical)",
       "artifact": "docs/security-audit.json"
     },
     "release": {
@@ -62,13 +64,13 @@
       "status": "NOT_COVERED",
       "evidenceStatus": "NOT_MEASURED",
       "method": "Ready deploy scripts (unexecuted without GCP project credentials)",
-      "artifact": "deploy/deploy.sh"
+      "artifact": "deploy/cloud-run/deploy.sh"
     },
     "configure": {
       "stage": "configure",
       "status": "COVERED",
       "evidenceStatus": "MEASURED",
-      "method": "Protected policy hash (d3a24931583bfe58...) + CODEOWNERS",
+      "method": "Protected policy hash (8255faa15a8078e8...) + CODEOWNERS",
       "artifact": "policy/route-invariants.json"
     },
     "monitor": {
@@ -82,20 +84,28 @@
       "stage": "govern",
       "status": "COVERED",
       "evidenceStatus": "HUMAN_APPROVAL_REQUIRED",
-      "method": "Supervised human promotion gate & signed Release Receipt",
+      "method": "Supervised human promotion gate & checksummed Release Receipt",
       "artifact": "artifacts/route-witness/release-receipt.json"
     }
   },
   "verificationSummary": {
-    "totalTests": 72,
-    "passedTests": 72,
+    "totalTests": 83,
+    "passedTests": 83,
     "failedTests": 0,
-    "coverageStatementsPct": 82.13,
-    "coverageBranchesPct": 79.93,
-    "coverageLinesPct": 82.13,
+    "coverageStatementsPct": 82.31,
+    "coverageBranchesPct": 79.47,
+    "coverageLinesPct": 82.31,
     "securityViolationsCount": 0,
     "provenanceBaselineValid": true,
     "goldenRegressionTestPassed": true,
+    "playwright": {
+      "total": 50,
+      "passed": 50,
+      "failed": 0,
+      "skipped": 0,
+      "projectsCount": 5,
+      "axeChecksPassed": true
+    },
     "syntheticDataDisclosurePresent": true,
     "nonCertificationDisclosurePresent": true
   },

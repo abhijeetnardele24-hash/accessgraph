@@ -71,11 +71,11 @@ RouteWitness is entered under **Path B (Bring Your Own)**, building upon our exi
 |---|---|---|---|
 | **Plan** | Duo Flow triggers `classify_route_change` to identify affected edges & profiles. | `artifacts/route-witness/impact-manifest.json` | `MEASURED` |
 | **Create** | Duo generates minimal counterexample; prepares corrective commit/MR. | `artifacts/route-witness/minimal-witness.json` | `MEASURED` |
-| **Verify** | Vitest 72 tests passed (82.13% expanded coverage across domain, core & MCP) + Playwright Axe audit across viewports. | Vitest JUnit report + Coverage + Golden test | `MEASURED` |
+| **Verify** | Vitest 83 tests passed (82.31% expanded coverage across domain, core & MCP) + Playwright Axe audit across viewports. | Vitest JUnit report + Coverage + Golden test | `MEASURED` |
 | **Package** | Multi-stage Dockerfile verified locally; container push configured for GitLab Registry. | `Dockerfile` + `.gitlab-ci.yml` (package job) | `PARTIAL` / `NOT_MEASURED` (pending cloud registry credentials) |
 | **Secure** | Dependency audit (`npm audit`) + Secret scan (`security-scan.cjs`). | `docs/security-audit.json` (0 high/critical vulnerabilities, 0 leaked secrets) | `MEASURED` |
-| **Release** | Tagged candidate revision deploy script configured for Google Cloud Run (0% traffic). | `deploy/deploy.sh` + `.gitlab-ci.yml` | `NOT_COVERED` / `NOT_MEASURED` (pending GCP project credentials) |
-| **Configure** | Target-branch protected policy & CODEOWNERS governance. | `policy/route-invariants.json` + `CODEOWNERS` (canonical hash: `d3a24931...`) | `MEASURED` |
+| **Release** | Tagged candidate revision deploy script configured for Google Cloud Run (0% traffic). | `deploy/cloud-run/deploy.sh` + `.gitlab-ci.yml` | `NOT_COVERED` / `NOT_MEASURED` (pending GCP project credentials) |
+| **Configure** | Target-branch protected policy & CODEOWNERS governance. | `policy/route-invariants.json` + `CODEOWNERS` (canonical hash: `8255faa1...`) | `MEASURED` |
 | **Monitor** | Container `/healthz` probe and `/version.json` SHA reflection verified on local server. | `server.cjs` + `scripts/replay-deployment.ts` | `NOT_COVERED` / `NOT_MEASURED` (pending live cloud deployment) |
 | **Govern** | Supervised manual production promotion & tamper-evident Release Receipt. | `artifacts/route-witness/release-receipt.json` | `HUMAN APPROVAL REQUIRED` |
 

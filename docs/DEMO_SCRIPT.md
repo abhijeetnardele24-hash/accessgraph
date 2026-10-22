@@ -56,8 +56,8 @@
 ---
 
 ### [2:55 - 3:20] Verification & Closing
-- **Visual:** Show terminal running test suite (36 unit tests passing, 45 Playwright test executions across 5 viewports passing, 0 Axe violations).
+- **Visual:** Show terminal running test suite (83 unit tests passing, 50 Playwright test executions across 5 viewports passing, 0 Axe violations).
 - **Narrator (Voiceover):**  
-  *"AccessGraph is a working hackathon prototype with reproducible automated evidence. The suite includes 36 Vitest unit and component tests with over 94% statement coverage and 45 Playwright executions across five responsive viewports. Axe detected zero violations in the five tested interaction states.*
-  *By uniting daily student wayfinding with systemic infrastructure auditing, AccessGraph ensures that accessibility is no longer an afterthought—it's a measurable, solvable priority.*  
+  *"AccessGraph and RouteWitness provide a working hackathon prototype with reproducible automated evidence. The suite includes 83 Vitest unit, domain, and verification tests with over 82% statement coverage and 50 Playwright executions across five responsive viewports. Axe detected zero violations in the tested interaction states.*
+  *By uniting daily student wayfinding with systemic infrastructure auditing and supervised release twins, RouteWitness ensures that accessibility is no longer an afterthought—it's a measurable, solvable priority.*  
   *Thank you."*

@@ -151,6 +151,6 @@ Deterministic candidate ranking prioritizes:
 | **Framework** | React 18 + TypeScript | Strict static typing for domain safety |
 | **Bundler** | Vite 5 | Sub-second HMR, optimized manual chunk splitting |
 | **Icons** | Lucide React | Lightweight SVG symbols without external webfonts |
-| **Unit Testing** | Vitest 2.1 + v8 coverage | 36/36 passed, 94.07% statement coverage, 89.4% branch coverage, 100% function coverage |
-| **E2E & Accessibility** | Playwright + `@axe-core/playwright` | 45/45 executions passed across 5 viewports; 0 Axe violations across 5 tested states |
+| **Unit Testing** | Vitest 2.1 + v8 coverage | 83/83 passed, 82.31% statement coverage, 80.32% branch coverage, 90.62% function coverage |
+| **E2E & Accessibility** | Playwright + `@axe-core/playwright` | 50/50 executions passed across 5 viewports; 0 Axe violations across 5 tested states |
 | **Security Scanning** | Custom Git + Working Tree Scanner | Full commit history scanned for secret leaks |

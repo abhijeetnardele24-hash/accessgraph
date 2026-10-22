@@ -119,7 +119,7 @@ export const ReleaseEvidenceBoard: React.FC<ReleaseEvidenceProps> = ({
       )}
 
       {/* Missing Evidence State */}
-      {!loading && loadError === "missing" && (
+      {!showSyntheticDemo && !loading && loadError === "missing" && (
         <div
           role="alert"
           style={{
@@ -145,7 +145,7 @@ export const ReleaseEvidenceBoard: React.FC<ReleaseEvidenceProps> = ({
       )}
 
       {/* Malformed Evidence State */}
-      {!loading && loadError === "malformed" && (
+      {!showSyntheticDemo && !loading && loadError === "malformed" && (
         <div
           role="alert"
           style={{
@@ -197,7 +197,8 @@ export const ReleaseEvidenceBoard: React.FC<ReleaseEvidenceProps> = ({
       <div
         style={{
           border: showSyntheticDemo || hasFailingWitness ? "1px solid #ef4444" : "1px solid #22c55e",
-          background: showSyntheticDemo || hasFailingWitness ? "rgba(239, 68, 68, 0.1)" : "rgba(34, 197, 94, 0.08)",
+          background: showSyntheticDemo || hasFailingWitness ? "#450a0a" : "#052e16",
+          color: "#ffffff",
           borderRadius: "8px",
           padding: "1rem 1.25rem",
           display: "flex",
@@ -253,7 +254,7 @@ export const ReleaseEvidenceBoard: React.FC<ReleaseEvidenceProps> = ({
             alignItems: "center",
             gap: "0.5rem",
           }}
-          aria-label="Toggle synthetic demonstration mode"
+          aria-label={showSyntheticDemo ? "Exit Synthetic Demo (Synthetic Demonstration Mode)" : "Inspect Seeded Regression (Synthetic Demonstration Mode)"}
         >
           <RefreshCw size={14} aria-hidden="true" />
           <span>{showSyntheticDemo ? "Exit Synthetic Demo" : "Inspect Seeded Regression"}</span>
@@ -306,7 +307,7 @@ export const ReleaseEvidenceBoard: React.FC<ReleaseEvidenceProps> = ({
           >
             {receipt ? receipt.checksumSha256.slice(0, 24) + "..." : "NOT_COMPUTED"}
           </div>
-          <span style={{ fontSize: "0.6875rem", color: "#64748b" }}>Integrity checksum only; not an attestation</span>
+          <span style={{ fontSize: "0.6875rem", color: "#94a3b8" }}>Integrity checksum only; not an attestation</span>
         </div>
 
         {/* Deployment Target / Cloud Run */}
@@ -369,7 +370,7 @@ export const ReleaseEvidenceBoard: React.FC<ReleaseEvidenceProps> = ({
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
               <span style={{ color: "#94a3b8" }}>Profile:</span>
-              <span style={{ background: "#0284c7", padding: "0.1rem 0.5rem", borderRadius: "4px", fontSize: "0.75rem" }}>
+              <span style={{ background: "#0369a1", color: "#ffffff", padding: "0.15rem 0.5rem", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 600 }}>
                 Step-free / Wheelchair
               </span>
             </div>

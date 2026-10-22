@@ -28,7 +28,7 @@
       "id": "scenario_gate_to_library_step_free",
       "description": "Campus Main Gate to Library under Step-Free profile",
       "originId": "node_gate",
-      "destinationId": "node_library",
+      "destinationId": "node_lib_entrance",
       "profileId": "step_free",
       "activeBarrierIds": [],
       "invariantId": "INV-01",

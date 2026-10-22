@@ -11,10 +11,10 @@
 
 - [x] **Static Type Safety:** `npm run typecheck` exits code `0` with 0 errors (`tsc --noEmit`).
 - [x] **Production Build:** `npm run build` completes cleanly in under 2 seconds.
-- [x] **Unit & Domain Tests:** `npm test` runs 72 tests in Vitest v8; all 72 pass with **82.13% expanded statement coverage** across domain, RouteWitness core, and MCP modules.
+- [x] **Unit & Domain Tests:** `npm test` runs 83 tests in Vitest v8; all 83 pass with **82.31% expanded statement coverage** across domain, RouteWitness core, and MCP modules.
 - [x] **Golden Regression Proof:** `tests/unit/routeWitness.golden.test.ts` passes (19/19 tests) proving deterministic detection and minimal counterexample generation for the signature lift-edge regression.
 - [x] **Provenance & License Verification:** `npm run verify:provenance` confirms MIT license and `docs/PRIOR_WORK.md` mapping to baseline SHA `a85d644148a774412eac65feadb93c7d9f9cb595`.
-- [x] **Protected Policy Integrity:** `npm run verify:policy` confirms SHA-256 integrity hash of `policy/` directory files (`d3a24931583bfe582863058b7ec3ad354ac32c24c4ca0e3273c6507cb78ec588`).
+- [x] **Protected Policy Integrity:** `npm run verify:policy` confirms SHA-256 integrity hash of `policy/` directory files (`8255faa15a8078e85c6b4727b3c3ef56f1b41d6e41a3a7e7e06b343e893139f4`).
 - [x] **Deterministic CLI Suite:** `witness:classify`, `witness:compare`, `witness:minimize`, and `witness:receipt` execute deterministically with zero errors.
 - [x] **Model Context Protocol (MCP) Server:** `route-witness/mcp/server.ts` tested over stdio JSON-RPC 2.0 with strict Zod validation and local path boundaries.
 - [x] **GitLab Duo Flow:** `.gitlab/duo/flows/route-witness.yml` and agent prompts configured with layered read-only analyst, hypothesis, and write-limited reporter.
