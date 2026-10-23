@@ -1,63 +1,47 @@
-# AccessGraph — Demonstration Video Script (3:20 Timed Guide)
+# RouteWitness — Demonstration Video Script (2:45 Timed Guide)
 
 > **Submission Media Script**  
-> **Target Duration:** Exactly 3 minutes and 20 seconds (200 seconds)  
-> **Pacing:** Clear, deliberate, authoritative, and focused on tangible civic impact.
+> **Target Duration:** Exactly 2 minutes and 45 seconds (165 seconds — strictly under 3 minutes)  
+> **Pacing:** Clear, deliberate, authoritative, and focused on verifiable engineering rigor.  
 
 ---
 
-### [0:00 - 0:35] The Problem: Why Traditional Navigation Fails Disabled Students
-- **Visual:** Screen opens on AccessGraph landing page. Crisp, clean UI displaying the Synthetic Demo Campus map.
+### [0:00 - 0:25] The Problem: Why Traditional CI Misses Accessibility Regressions
+- **Visual:** Open on GitLab Merge Request diff touching campus waypoint connectivity (`src/data/demoCampus.ts`). Standard CI shows all green unit tests and linters.
 - **Narrator (Voiceover):**  
-  *"Students with physical disabilities, mobility aids, temporary injuries, or sensory sensitivities frequently encounter hidden campus barriers. General-purpose navigation may prioritize distance and walking time without modeling every mobility constraint. A route that looks faster can still include stairs or rely on a lift that is out of service.*
-  *Meanwhile, university facilities managers operate with limited capital budgets. This is AccessGraph: constraint-aware campus wayfinding that transforms daily detour burdens into actionable infrastructure repair priorities."*
+  *"In modern software delivery, accessibility is often treated as a superficial lint rule or color contrast check. But for people with mobility impairments, transit accessibility is a graph reachability invariant. When a pull request modifies campus infrastructure or schedules elevator maintenance, traditional CI passes every test—while step-free routes between classrooms quietly sever. Traditional CI has no concept of topological accessibility debt. RouteWitness solves this."*
 
 ---
 
-### [0:35 - 1:15] The Signature Journey: Stairs, Lift & Courtyard Ramp Reroute
-- **Visual:** Cursor selects Origin: **Library Entrance** and Destination: **Science Lab (Floor 2)**.
+### [0:25 - 0:55] RouteWitness Architecture: AI Proposes, Deterministic Policy Decides
+- **Visual:** Switch to GitLab Duo Agent / terminal executing `witness:classify`. The RouteWitness impact analyst evaluates the diff.
 - **Narrator (Voiceover):**  
-  *"Let's observe our signature demonstration. Under the default 'Fastest' profile, the engine calculates the direct path: 455 meters in 5 minutes 50 seconds, utilizing the central atrium stairs up to the second floor mezzanine.*  
-  *Now watch what happens when we switch to the 'Step-Free' profile.*  
-  *(Click 'Step-Free' chip)*  
-  *Instantly, the hard constraint filter rejects the stairs. But notice our active incident banner: the Science Complex passenger elevator is undergoing a traction motor overhaul.*  
-  *For this synthetic campus fixture, AccessGraph finds a valid alternative through the central courtyard and across the covered elevated ramp, keeping the demonstrated route step-free."*
+  *"RouteWitness introduces an evidence-backed release twin for accessible infrastructure. When a change is proposed, our GitLab Duo flow triggers the RouteWitness Impact Analyst. Duo parses the AST diff and generates probabilistic risk hypotheses. But critically: the AI never decides whether code ships. Our pure TypeScript routing engine deterministically re-evaluates multi-objective graph reachability against immutable policy invariants, enforcing Invariant 01: No Unexplained Disconnection."*
 
 ---
 
-### [1:15 - 1:45] Deterministic Proof & Multi-Objective Matrix
-- **Visual:** Zoom into the Route Inspector panel on the right.
+### [0:55 - 1:30] The Signature Regression: The Simulated Elevator Overhaul
+- **Visual:** Show MR introducing the Science Complex lift outage without opening the alternative courtyard ramp. RouteWitness executes `witness:compare` and `witness:minimize`.
 - **Narrator (Voiceover):**  
-  *"Look at the Route Inspector on the right. AccessGraph provides mathematical proof for every turn. It explicitly states: 'The 455m unconstrained route contains stairs and was rejected by the Step-free policy. Elevator outage avoided; rerouted via covered courtyard ramp.'*  
-  *In our cost matrix, you can inspect the multi-objective score: walking duration, slope effort, lighting quality, and sensory load penalties are transparently itemized. A 4-key tie-breaker ensures identical route calculation every single time, eliminating confusing path oscillation across edge shuffles."*
+  *"Here is our signature counterfactual demonstration. An MR introduces an outage on the Science Complex passenger lift. Under the unconstrained profile, transit time barely increases via the atrium stairs. But for a power wheelchair user on the Step-Free profile, both vertical paths are severed. RouteWitness detects the failure across the benchmark scenario matrix and invokes our counterexample reducer. Rather than dumping dozens of failures, it isolates the single minimal counterexample: Library Entrance to Science Lab Floor 2."*
 
 ---
 
-### [1:45 - 2:30] The Innovation: Access Debt Diagnostic Dashboard
-- **Visual:** Click "Access Debt Diagnostic" in the header navigation. The dashboard cards and repair table appear.
+### [1:30 - 2:05] Automated GitLab Merge Request Gate & Evidence Receipt
+- **Visual:** View the automated GitLab MR note generated by RouteWitness. Zoom into the BLOCK verdict, minimal witness JSON, and the Release Evidence Board tab in the web app.
 - **Narrator (Voiceover):**  
-  *"Now let's switch to the institutional view: The Access Debt Dashboard.*  
-  *Access Debt is the equity metric we defined for this prototype. Across 8 deterministic synthetic benchmark scenarios, we calculate the ratio of accessible transit time to fastest unconstrained travel time.*
-  *Under current conditions, campus travelers face an average 1.22x access penalty—an extra 22% transit burden simply to reach classes.*  
-  *Below, our counterfactual simulation engine tests the resolution of every reported barrier on campus and ranks them by immediate ROI.*  
-  *Ranked #1 is the Science Complex Lift Outage. In this fixture, resolving it recovers 2.9 minutes on the affected benchmark trip and reduces the step-free detour burden.*
-  *When facilities managers click 'Simulate Fix'...*  
-  *(Click 'Simulate Fix' button)*  
-  *...the simulation removes that synthetic outage and recalculates the campus benchmark so facilities teams can compare the projected impact before prioritizing work."*
+  *"RouteWitness posts an authoritative, structured note directly onto the GitLab Merge Request. The verdict is a hard, deterministic BLOCK. The note embeds the minimal counterexample, origin-destination coordinates, affected profiles, and links to the Release Receipt. Maintainers immediately see the exact trip that broke and the projected access debt penalty before a single line merges to main."*
 
 ---
 
-### [2:30 - 2:55] Local Computation & Tested Offline Reload
-- **Visual:** Disconnect Wi-Fi (toggle offline mode in devtools) and refresh the page. The application reloads instantly and functions seamlessly.
+### [2:05 - 2:30] The Release Evidence Board & Full Lifecycle Matrix
+- **Visual:** Click into the "Release Evidence" tab in the live AccessGraph app. Toggle simulated repair, show the 9-stage lifecycle table.
 - **Narrator (Voiceover):**  
-  *"Accessibility preferences can be sensitive. AccessGraph keeps routing and Access Debt calculations in the browser and includes no application telemetry or third-party tracking scripts. On the test host, the committed benchmark measured sub-millisecond median calculations.*
-  *After one online load installs the Service Worker, our automated browser test disconnects the network, reloads the app, and verifies that the cached interface and local routing journey still work offline."*
+  *"Inside the AccessGraph interface, the judge-facing Release Evidence Board displays the tamper-evident Release Receipt. Every receipt is bound to the exact Git commit SHA and policy hash. Notice our honest lifecycle accounting: Plan, Create, Verify, Secure, and Govern are verified and MEASURED. Because live cloud deployment was unexecuted without production cloud credentials, Release and Monitor are honestly labeled NOT_MEASURED. Zero fabricated claims."*
 
 ---
 
-### [2:55 - 3:20] Verification & Closing
-- **Visual:** Show terminal running test suite (85 unit tests passing, 50 Playwright test executions across 5 viewports passing, 0 Axe violations).
+### [2:30 - 2:45] Verification & Conclusion
+- **Visual:** Show the terminal verification summary: 85 Vitest tests passed (82.31% statement coverage), 50 Playwright Axe executions passed across 5 viewports with 0 violations.
 - **Narrator (Voiceover):**  
-  *"AccessGraph and RouteWitness provide a working hackathon prototype with reproducible automated evidence. The suite includes 85 Vitest unit, domain, and verification tests with over 82% statement coverage and 50 Playwright executions across five responsive viewports. Axe detected zero violations in the tested interaction states.*
-  *By uniting daily student wayfinding with systemic infrastructure auditing and supervised release twins, RouteWitness ensures that accessibility is no longer an afterthought—it's a measurable, solvable priority.*  
-  *Thank you."*
+  *"85 unit tests, 50 responsive browser executions with zero Axe violations, and 100% deterministic reproducibility. RouteWitness proves that AI can hypothesize and investigate, but deterministic code must own the release gate. Thank you."*
