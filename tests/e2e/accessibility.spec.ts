@@ -386,51 +386,5 @@ test.describe("AccessGraph Comprehensive E2E Verification Suite", () => {
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
       .analyze();
     expect(auditDebt.violations).toEqual([]);
-
-    // State 6: Release Evidence Board Axe Scan
-    const evidenceTabBtn = page.locator("button.nav-tab-btn", { hasText: "Release Evidence" });
-    await evidenceTabBtn.click();
-    await page.waitForSelector(".release-evidence-board");
-    await page.mouse.move(0, 0);
-    await page.waitForTimeout(200);
-    const auditEvidence = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-      .analyze();
-    expect(auditEvidence.violations).toEqual([]);
-  });
-
-  // Test 7: Release Evidence Board Interaction & Keyboard Navigation
-  test("7. Release Evidence Board: Keyboard navigation, synthetic demo toggle, and honest disclosures", async ({
-    page,
-  }) => {
-    await page.goto("./");
-    await page.waitForSelector(".app-header");
-
-    const evidenceTabBtn = page.locator("button.nav-tab-btn", { hasText: "Release Evidence" });
-    await evidenceTabBtn.click();
-    await page.waitForSelector(".release-evidence-board");
-
-    // Verify non-certification disclosure is present
-    const board = page.locator(".release-evidence-board");
-    await expect(board).toContainText("Non-Certification Disclosure");
-    await expect(board).toContainText("isSyntheticDemo: true");
-
-    // Verify synthetic demonstration button and toggle
-    const toggleBtn = page.getByRole("button", { name: /synthetic demonstration mode/i });
-    await expect(toggleBtn).toBeVisible();
-
-    // Toggle via keyboard
-    await toggleBtn.focus();
-    await page.keyboard.press("Enter");
-
-    // Verify synthetic demonstration alert appears
-    const alert = page.getByRole("alert").first();
-    await expect(alert).toBeVisible();
-    await expect(alert).toContainText("SYNTHETIC DEMONSTRATION MODE ACTIVE");
-    await expect(board).toContainText("SYNTHETIC DEMO: PIPELINE GATE BLOCKED");
-
-    // Exit synthetic demonstration
-    await toggleBtn.click();
-    await expect(page.locator("text=SYNTHETIC DEMONSTRATION MODE ACTIVE")).not.toBeVisible();
   });
 });

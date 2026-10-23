@@ -1,19 +1,17 @@
-# RouteWitness (AccessGraph)
+# AccessGraph
 
 <div align="center">
 
-**A GitLab Duo Supervised Release Flow that proves who a route change would strand before production.**
+**Constraint-aware campus navigation that turns inaccessible routes into actionable repair priorities.**
 
-*Built on the MIT-licensed AccessGraph campus accessibility engine for the [Life After Code — GitLab Transcend Hackathon](https://gitlab-transcend.devpost.com/) (Path B).*
-
-[![GitLab CI Pipeline](https://img.shields.io/badge/GitLab%20CI-10%20Stages%20Covered-FC6D26?logo=gitlab)](https://gitlab.com)
-[![GitLab Duo Agent Platform](https://img.shields.io/badge/GitLab%20Duo-Custom%20Flow%20%2B%20MCP-E24329?logo=gitlab)](./docs/GITLAB_DUO_SETUP.md)
-[![Autonomy: Supervised](https://img.shields.io/badge/Autonomy-Supervised%20(Human%20Gate)-F59E0B.svg)](./docs/THREAT_MODEL.md)
-[![Deployment: Google Cloud Run](https://img.shields.io/badge/Deployment-Google%20Cloud%20Run-4285F4?logo=google-cloud)](./docs/GOOGLE_CLOUD_DEPLOYMENT.md)
-[![Unit Coverage: 82.13%](https://img.shields.io/badge/Coverage-82.13%25%20Expanded-1B6494.svg)](https://github.com/abhijeetnardele24-hash/accessgraph)
+[![CI Quality Gate](https://github.com/abhijeetnardele24-hash/accessgraph/actions/workflows/ci.yml/badge.svg)](https://github.com/abhijeetnardele24-hash/accessgraph/actions/workflows/ci.yml)
+[![Accessibility: automated Axe audit](https://img.shields.io/badge/Accessibility-Axe%20audit%20%7C%205%20states-164E35.svg)](https://github.com/abhijeetnardele24-hash/accessgraph)
+[![Unit Coverage: 94.07%](https://img.shields.io/badge/Coverage-94.07%25%20Statements-1B6494.svg)](https://github.com/abhijeetnardele24-hash/accessgraph)
+[![Playwright E2E: 45/45 Passed](https://img.shields.io/badge/Playwright-45%2F45%20Executions%20Passed-164E35.svg)](https://github.com/abhijeetnardele24-hash/accessgraph)
+[![Offline: PWA Ready](https://img.shields.io/badge/Offline-PWA%20Service%20Worker-B45309.svg)](https://github.com/abhijeetnardele24-hash/accessgraph)
 [![License: MIT](https://img.shields.io/badge/License-MIT-4D5358.svg)](./LICENSE)
 
-[**Prior Work Provenance**](./docs/PRIOR_WORK.md) • [**GitLab Duo Setup**](./docs/GITLAB_DUO_SETUP.md) • [**Google Cloud Run Deploy**](./docs/GOOGLE_CLOUD_DEPLOYMENT.md) • [**Threat Model**](./docs/THREAT_MODEL.md) • [**Evidence Model**](./docs/EVIDENCE_MODEL.md) • [**Architecture Specs**](./docs/ARCHITECTURE.md)
+[**Live Application**](https://abhijeetnardele24-hash.github.io/accessgraph/) • [**Architecture Specs**](./docs/ARCHITECTURE.md) • [**Data Dictionary**](./docs/DATA_DICTIONARY.md) • [**Evaluation Report**](./docs/EVALUATION.md) • [**Devpost Submission**](./docs/DEVPOST_SUBMISSION.md) • [**Demo Script**](./docs/DEMO_SCRIPT.md)
 
 </div>
 
@@ -167,8 +165,8 @@ Disconnected routes are tracked separately in `disconnectedCount` without arbitr
 | **Schematic Graphics** | Custom Accessible SVG | Scalable campus topology, multi-floor waypoints, clear routes |
 | **Persistence** | Browser `localStorage` | Private local incident logs and user profile preferences |
 | **Offline Architecture** | Service Worker (`public/sw.js`) | Offline navigation fallback and asset caching |
-| **Unit Testing** | Vitest 2.1 + v8 coverage | 85 unit/component tests, 82.31% statement coverage |
-| **E2E & Accessibility** | Playwright + `@axe-core/playwright` | 10 distinct test specs across 5 viewports (50 total executions); Axe found 0 violations in 5 tested states |
+| **Unit Testing** | Vitest 2.1 + v8 coverage | 36 unit/component tests, 94.07% statement coverage |
+| **E2E & Accessibility** | Playwright + `@axe-core/playwright` | 9 distinct test specs across 5 viewports (45 total executions); Axe found 0 violations in 5 tested states |
 | **Security Auditing** | Custom Node.js Security Scanner | Full Git history streaming scan for secret leaks |
 
 ---
@@ -215,7 +213,7 @@ npm run lint
 # Run unit and component tests with v8 code coverage
 npm test
 
-# Run multi-viewport Playwright E2E & Axe accessibility audit (50 executions)
+# Run multi-viewport Playwright E2E & Axe accessibility audit (45 executions)
 npm run test:e2e
 
 # Run reproducible routing and Access Debt performance benchmarks
@@ -236,8 +234,8 @@ npm run audit
 | :--- | :--- | :--- | :--- |
 | **Type Safety** | `tsc --noEmit` | 0 TypeScript errors | **PASS** (0 errors) |
 | **Code Quality** | `eslint` | 0 ESLint errors/warnings | **PASS** (0 warnings) |
-| **Unit Test Suite** | Vitest v8 | $\ge 80\%$ statements, $\ge 75\%$ branches | **PASS** (82.31% stmts, 79.54% branches, 85/85 tests) |
-| **E2E Viewports** | Playwright | 320px, 390px, 768px, 1280px, 1920px | **PASS** (50/50 executions) |
+| **Unit Test Suite** | Vitest v8 | $\ge 85\%$ lines, $\ge 80\%$ branches | **PASS** (94.07% stmts, 89.4% branches, 36/36 tests) |
+| **E2E Viewports** | Playwright | 320px, 390px, 768px, 1280px, 1920px | **PASS** (45/45 executions) |
 | **Accessibility Audit** | `@axe-core/playwright` | Automated Axe rules across 5 states | **PASS** (0 detected violations; focus, touch targets & overflow additionally tested) |
 | **Performance Benchmarks** | `scripts/run-benchmarks.ts` | 1,000 Dijkstra runs + 200 audits | **PASS** (0.020ms Dijkstra median, 0.555ms audit median on the recorded test host) |
 | **Evidence & Metric Check** | `scripts/check-evidence.ts` | Monotonicity + JSON artifact sync | **PASS** (1.165x $\rightarrow$ 1.223x debt) |

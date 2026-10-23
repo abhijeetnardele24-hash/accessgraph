@@ -143,22 +143,6 @@ if (fs.existsSync(distDir)) {
   console.log("   (dist/ does not exist yet; skip bundle inspection)");
 }
 
-// Write machine-readable audit report
-const auditReport = {
-  timestamp: new Date().toISOString(),
-  commitSha: execSync("git rev-parse HEAD", { cwd: rootDir, encoding: "utf8" }).trim(),
-  historyScannedCount,
-  filesScannedCount,
-  violationsCount: violations.length,
-  violations,
-  status: violations.length === 0 ? "PASS" : "FAIL",
-};
-const docsDir = path.join(rootDir, "docs");
-if (!fs.existsSync(docsDir)) {
-  fs.mkdirSync(docsDir, { recursive: true });
-}
-fs.writeFileSync(path.join(docsDir, "security-audit.json"), JSON.stringify(auditReport, null, 2), "utf8");
-
 // Final Verdict
 if (violations.length > 0) {
   console.error("\n❌ [Security Scanner] SECURITY VIOLATIONS DETECTED (Exit 1):");
@@ -171,5 +155,4 @@ if (violations.length > 0) {
   console.log(`   - Scanned ${historyScannedCount} commits in full Git history: 0 exposed secrets.`);
   console.log(`   - Scanned ${filesScannedCount} working tree files: 0 exposed secrets.`);
   console.log("   - Dist bundle: 0 sourcemap leaks, 0 credential leaks.");
-  console.log(`   - Audit written to docs/security-audit.json`);
 }

@@ -18,8 +18,6 @@ dist-ssr/
 
 # Testing & Coverage
 coverage/
-junit.xml
-artifacts/
 playwright-report/
 test-results/
 blob-report/
@@ -34,7 +32,6 @@ pnpm-debug.log*
 lerna-debug.log*
 .eslintcache
 
-# Local Mirror & IDE
-.git-mirror-accessgraph/
-.agents/
-.claude/
+# OS Files
+.DS_Store
+Thumbs.db

@@ -16,21 +16,13 @@
     "benchmark": "tsx scripts/run-benchmarks.ts",
     "evidence:check": "tsx scripts/check-evidence.ts",
     "audit": "npm audit --omit=dev --audit-level=high",
-    "security-scan": "node scripts/security-scan.cjs",
-    "witness:classify": "tsx route-witness/cli/index.ts classify",
-    "witness:compare": "tsx route-witness/cli/index.ts compare",
-    "witness:minimize": "tsx route-witness/cli/index.ts minimize",
-    "witness:receipt": "tsx route-witness/cli/index.ts receipt",
-    "verify:provenance": "tsx scripts/verify-provenance.ts",
-    "verify:policy": "tsx scripts/verify-policy-integrity.ts",
-    "verify:final": "tsx scripts/generate-final-evidence.ts"
+    "security-scan": "node scripts/security-scan.cjs"
   },
   "dependencies": {
     "idb": "^8.0.2",
     "lucide-react": "^0.475.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "zod": "^4.6.7"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.1",

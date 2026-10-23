@@ -21,11 +21,10 @@ import { RouteInspector } from "./components/RouteInspector";
 import { AccessDebtDashboard } from "./components/AccessDebtDashboard";
 import { AddBarrierModal } from "./components/AddBarrierModal";
 import { CustomProfileModal } from "./components/CustomProfileModal";
-import { ReleaseEvidenceBoard } from "./release-evidence/ReleaseEvidenceBoard";
 
 export const App: React.FC = () => {
   // Application view tab
-  const [activeTab, setActiveTab] = useState<"planner" | "access_debt" | "release_evidence">("planner");
+  const [activeTab, setActiveTab] = useState<"planner" | "access_debt">("planner");
 
   // Selected Profile ID ("fastest" | "step_free" | "low_vision" | "low_sensory" | "shade_rest" | "custom")
   const [selectedProfileId, setSelectedProfileId] = useState<string>(() => loadStoredProfileId());
@@ -199,17 +198,13 @@ export const App: React.FC = () => {
               />
             </div>
           </div>
-        ) : activeTab === "access_debt" ? (
+        ) : (
           <div className="debt-layout">
             <AccessDebtDashboard
               report={accessDebtReport}
               onSimulateRepair={handleSimulateRepair}
               onResetBarriers={handleResetBarriers}
             />
-          </div>
-        ) : (
-          <div className="evidence-layout">
-            <ReleaseEvidenceBoard />
           </div>
         )}
       </main>
