@@ -11,7 +11,7 @@
  * 4. Verifies deployed route calculation preserves step-free invariant.
  */
 
-import { readFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { resolve } from "path";
 
 async function fetchWithTimeout(url: string, timeoutMs = 10000): Promise<Response> {
@@ -91,6 +91,20 @@ async function replay() {
       }
       console.log(`  ✓ Deployed replay confirms step-free routing invariant satisfied.`);
     }
+
+    const replayResults = {
+      timestamp: new Date().toISOString(),
+      targetUrl,
+      healthz: 200,
+      versionMatch: true,
+      commitSha: process.env.CI_COMMIT_SHA || null,
+      replayPassed: true,
+    };
+    const outDir = resolve(process.cwd(), "artifacts/route-witness");
+    if (!existsSync(outDir)) {
+      mkdirSync(outDir, { recursive: true });
+    }
+    writeFileSync(resolve(outDir, "deployed-replay-results.json"), JSON.stringify(replayResults, null, 2), "utf8");
 
     console.log("[Replay] Candidate replay completed successfully.");
   } catch (err: any) {

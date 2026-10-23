@@ -3,16 +3,16 @@
   "generatorVersion": "1.0.0",
   "evidenceScope": "local_verification_snapshot",
   "authoritativePipelineNotice": "Authoritative evidence is generated in GitLab CI for exact CI_COMMIT_SHA and exported as pipeline artifact evidence-$CI_COMMIT_SHORT_SHA. This file is a source-controlled local snapshot.",
-  "generatedAt": "2026-10-22T19:05:49.713Z",
-  "commitSha": "cb88d45b4744ec461476a48ec2707044e9afc111",
-  "baselineSha": "7764db519ccad31263e76eac39b98f490db12a07",
+  "generatedAt": "2026-10-23T09:34:24.345Z",
+  "commitSha": "9e2bc221d237ce5f80651d16a901d7789e187545",
+  "baselineSha": "cb88d45b4744ec461476a48ec2707044e9afc111",
   "policyHash": "8255faa15a8078e85c6b4727b3c3ef56f1b41d6e41a3a7e7e06b343e893139f4",
   "baselineTag": {
     "name": "pre-routewitness-baseline",
     "valid": true,
     "targetSha": "a85d644148a774412eac65feadb93c7d9f9cb595"
   },
-  "receiptChecksumSha256": "ab31aa036f708be270530ec46dab0c3dd2786225515651ae4a6967a77786e7dd",
+  "receiptChecksumSha256": "7b3d04a7be5ac1a57e8340d9e8a625871ea8660361421f91e422ee9272c4bcca",
   "pipelineUrl": "NOT_MEASURED",
   "cloudRun": {
     "revision": "NOT_MEASURED",
@@ -28,7 +28,7 @@
       "stage": "plan",
       "status": "COVERED",
       "evidenceStatus": "MEASURED",
-      "method": "GitLab Duo Impact Classifier Flow v1 + MCP",
+      "method": "RouteWitness Impact Classifier CLI + Duo custom flow v1 (LOCAL_STRUCTURE_CHECK_ONLY; remote Duo execution unmeasured)",
       "artifact": "artifacts/route-witness/impact-manifest.json"
     },
     "create": {
@@ -42,7 +42,7 @@
       "stage": "verify",
       "status": "COVERED",
       "evidenceStatus": "MEASURED",
-      "method": "Vitest (83 tests passed, coverage 82.31%) + Playwright Axe accessibility",
+      "method": "Vitest (85 tests passed, coverage 82.31%) + Playwright Axe accessibility",
       "artifact": "junit.xml"
     },
     "package": {
@@ -63,37 +63,37 @@
       "stage": "release",
       "status": "NOT_COVERED",
       "evidenceStatus": "NOT_MEASURED",
-      "method": "Ready deploy scripts (unexecuted without GCP project credentials)",
+      "method": "Ready deploy scripts (unexecuted without GCP project credentials; candidate revision not deployed)",
       "artifact": "deploy/cloud-run/deploy.sh"
     },
     "configure": {
       "stage": "configure",
-      "status": "COVERED",
+      "status": "PARTIAL",
       "evidenceStatus": "MEASURED",
-      "method": "Protected policy hash (8255faa15a8078e8...) + CODEOWNERS",
+      "method": "Repository policy hash verified locally (8255faa15a8078e8...); remote GitLab branch protection & approval rules NOT_MEASURED",
       "artifact": "policy/route-invariants.json"
     },
     "monitor": {
       "stage": "monitor",
       "status": "NOT_COVERED",
       "evidenceStatus": "NOT_MEASURED",
-      "method": "Local server.cjs healthz probe verified",
+      "method": "Candidate replay unexecuted; live HTTP monitoring NOT_MEASURED",
       "artifact": "scripts/replay-deployment.ts"
     },
     "govern": {
       "stage": "govern",
       "status": "COVERED",
       "evidenceStatus": "HUMAN_APPROVAL_REQUIRED",
-      "method": "Supervised human promotion gate & checksummed Release Receipt",
+      "method": "Supervised human promotion gate & checksummed Release Receipt (integrity checksum only; not cryptographically signed)",
       "artifact": "artifacts/route-witness/release-receipt.json"
     }
   },
   "verificationSummary": {
-    "totalTests": 83,
-    "passedTests": 83,
+    "totalTests": 85,
+    "passedTests": 85,
     "failedTests": 0,
     "coverageStatementsPct": 82.31,
-    "coverageBranchesPct": 79.47,
+    "coverageBranchesPct": 79.54,
     "coverageLinesPct": 82.31,
     "securityViolationsCount": 0,
     "provenanceBaselineValid": true,

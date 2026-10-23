@@ -17,7 +17,7 @@
  * 5. Uses "checksummed" rather than "signed" unless a genuine cryptographic signature is produced.
  */
 
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { resolve } from "path";
 import { execSync } from "child_process";
 import { computePolicyHash } from "./verify-policy-integrity.js";
@@ -199,11 +199,17 @@ export function verifyBaselineTag(): { valid: boolean; targetSha: string } {
 export interface GenerateEvidenceOptions {
   strict?: boolean;
   outputPath?: string;
+  authoritativeOutputPath?: string;
+  authoritativeOutputDir?: string;
+  skipAuthoritativeOutput?: boolean;
   coveragePath?: string;
   junitPath?: string;
   securityPath?: string;
   receiptPath?: string;
   playwrightPath?: string;
+  impactManifestPath?: string;
+  deploymentMetadataPath?: string;
+  replayResultPath?: string;
   candidateSha?: string;
   baselineSha?: string;
 }
@@ -270,8 +276,16 @@ export function generateFinalEvidence(opts?: GenerateEvidenceOptions) {
   const imageDigestEnv = process.env.OCI_IMAGE_DIGEST;
   const pipelineUrl = process.env.CI_PIPELINE_URL || "NOT_MEASURED";
 
-  // A candidate URL is only considered deployed if it's a real HTTP URL and not NOT_MEASURED
-  const isCandidateDeployed = Boolean(
+  // Strict OCI digest format validation: sha256:<64 hex chars>
+  const STRICT_OCI_DIGEST_REGEX = /^sha256:[a-f0-9]{64}$/;
+  const isPackaged = Boolean(
+    imageDigestEnv &&
+    imageDigestEnv !== "NOT_MEASURED" &&
+    (STRICT_OCI_DIGEST_REGEX.test(imageDigestEnv.trim()) ||
+     (imageDigestEnv.includes("@sha256:") && STRICT_OCI_DIGEST_REGEX.test(imageDigestEnv.split("@")[1]?.trim() || "")))
+  );
+
+  const isValidCandidateUrl = Boolean(
     candidateUrlEnv &&
     candidateUrlEnv !== "NOT_MEASURED" &&
     candidateUrlEnv.startsWith("https://") &&
@@ -279,19 +293,60 @@ export function generateFinalEvidence(opts?: GenerateEvidenceOptions) {
     !candidateUrlEnv.includes("${") // reject unexpanded env vars
   );
 
-  const isPackaged = Boolean(
-    imageDigestEnv &&
-    imageDigestEnv !== "NOT_MEASURED" &&
-    imageDigestEnv.includes("sha256:")
+  const isValidRevision = Boolean(
+    cloudRunRevisionEnv &&
+    cloudRunRevisionEnv !== "NOT_MEASURED" &&
+    !cloudRunRevisionEnv.includes("${")
+  );
+
+  // Deployment metadata validation
+  const deployMetaPath = opts?.deploymentMetadataPath || resolve(process.cwd(), "artifacts/route-witness/deployment-metadata.json");
+  let deploymentMetadata: any = null;
+  if (existsSync(deployMetaPath)) {
+    try {
+      deploymentMetadata = JSON.parse(readFileSync(deployMetaPath, "utf8"));
+    } catch {
+      deploymentMetadata = null;
+    }
+  }
+
+  // Release requires valid URL, revision, immutable OCI digest, deployment metadata, and matching commit SHA
+  const isCandidateDeployed = Boolean(
+    isValidCandidateUrl &&
+    isValidRevision &&
+    isPackaged &&
+    deploymentMetadata &&
+    deploymentMetadata.commitSha === candidateSha &&
+    deploymentMetadata.status === "DEPLOYED_0_PCT_TRAFFIC"
+  );
+
+  // Monitor verification: requires parsed successful /healthz, /version.json commit match, and deployed replay
+  const replayPath = opts?.replayResultPath || resolve(process.cwd(), "artifacts/route-witness/deployed-replay-results.json");
+  let replayResults: any = null;
+  if (existsSync(replayPath)) {
+    try {
+      replayResults = JSON.parse(readFileSync(replayPath, "utf8"));
+    } catch {
+      replayResults = null;
+    }
+  }
+
+  const isMonitorVerified = Boolean(
+    isCandidateDeployed &&
+    replayResults &&
+    replayResults.healthz === 200 &&
+    replayResults.versionMatch === true &&
+    replayResults.replayPassed === true &&
+    (!replayResults.commitSha || replayResults.commitSha === candidateSha)
   );
 
   // Derive stage status strictly from real measured evidence
   const stages = {
     plan: {
       stage: "plan",
-      status: existsSync(resolve(process.cwd(), "artifacts/route-witness/impact-manifest.json")) ? "COVERED" : "PARTIAL",
+      status: existsSync(opts?.impactManifestPath || resolve(process.cwd(), "artifacts/route-witness/impact-manifest.json")) ? "COVERED" : "PARTIAL",
       evidenceStatus: "MEASURED",
-      method: "GitLab Duo Impact Classifier Flow v1 + MCP",
+      method: "RouteWitness Impact Classifier CLI + Duo custom flow v1 (LOCAL_STRUCTURE_CHECK_ONLY; remote Duo execution unmeasured)",
       artifact: "artifacts/route-witness/impact-manifest.json",
     },
     create: {
@@ -326,28 +381,32 @@ export function generateFinalEvidence(opts?: GenerateEvidenceOptions) {
       stage: "release",
       status: isCandidateDeployed ? "COVERED" : "NOT_COVERED",
       evidenceStatus: isCandidateDeployed ? "MEASURED" : "NOT_MEASURED",
-      method: isCandidateDeployed ? `Cloud Run revision ${cloudRunRevisionEnv} (0% traffic)` : "Ready deploy scripts (unexecuted without GCP project credentials)",
+      method: isCandidateDeployed
+        ? `Cloud Run revision ${cloudRunRevisionEnv} (0% traffic, verified OCI digest & commit match)`
+        : "Ready deploy scripts (unexecuted without GCP project credentials; candidate revision not deployed)",
       artifact: "deploy/cloud-run/deploy.sh",
     },
     configure: {
       stage: "configure",
-      status: policyHash ? "COVERED" : "PARTIAL",
+      status: policyHash ? "PARTIAL" : "NOT_COVERED",
       evidenceStatus: "MEASURED",
-      method: `Protected policy hash (${policyHash.slice(0, 16)}...) + CODEOWNERS`,
+      method: `Repository policy hash verified locally (${policyHash.slice(0, 16)}...); remote GitLab branch protection & approval rules NOT_MEASURED`,
       artifact: "policy/route-invariants.json",
     },
     monitor: {
       stage: "monitor",
-      status: isCandidateDeployed ? "COVERED" : "NOT_COVERED",
-      evidenceStatus: isCandidateDeployed ? "MEASURED" : "NOT_MEASURED",
-      method: isCandidateDeployed ? "Live candidate /healthz probe + deployed witness replay" : "Local server.cjs healthz probe verified",
+      status: isMonitorVerified ? "COVERED" : "NOT_COVERED",
+      evidenceStatus: isMonitorVerified ? "MEASURED" : "NOT_MEASURED",
+      method: isMonitorVerified
+        ? "Live candidate /healthz probe (200 OK), /version.json commit match, and deployed witness replay verified"
+        : "Candidate replay unexecuted; live HTTP monitoring NOT_MEASURED",
       artifact: "scripts/replay-deployment.ts",
     },
     govern: {
       stage: "govern",
       status: "COVERED",
       evidenceStatus: "HUMAN_APPROVAL_REQUIRED",
-      method: "Supervised human promotion gate & checksummed Release Receipt",
+      method: "Supervised human promotion gate & checksummed Release Receipt (integrity checksum only; not cryptographically signed)",
       artifact: "artifacts/route-witness/release-receipt.json",
     },
   };
@@ -383,12 +442,12 @@ export function generateFinalEvidence(opts?: GenerateEvidenceOptions) {
     receiptChecksumSha256: receipt?.checksumSha256 ?? "NOT_COMPUTED",
     pipelineUrl,
     cloudRun: {
-      revision: cloudRunRevisionEnv || "NOT_MEASURED",
-      candidateUrl: candidateUrlEnv || "NOT_MEASURED",
+      revision: isCandidateDeployed ? (cloudRunRevisionEnv || "NOT_MEASURED") : "NOT_MEASURED",
+      candidateUrl: isCandidateDeployed ? (candidateUrlEnv || "NOT_MEASURED") : "NOT_MEASURED",
       status: isCandidateDeployed ? "DEPLOYED_0_PCT_TRAFFIC" : "NOT_MEASURED",
     },
     ociImage: {
-      digest: imageDigestEnv || "NOT_MEASURED",
+      digest: isPackaged ? (imageDigestEnv || "NOT_MEASURED") : "NOT_MEASURED",
       status: isPackaged ? "PUBLISHED" : "NOT_MEASURED",
     },
     stages,
@@ -421,17 +480,27 @@ export function generateFinalEvidence(opts?: GenerateEvidenceOptions) {
   writeFileSync(outPath, JSON.stringify(results, null, 2), "utf8");
   console.log(`[Final Evidence] Written to ${outPath}`);
 
-  const artifactsEvidenceDir = resolve(process.cwd(), "artifacts/route-witness");
-  if (!existsSync(artifactsEvidenceDir)) {
-    mkdirSync(artifactsEvidenceDir, { recursive: true });
+  if (!opts?.skipAuthoritativeOutput) {
+    let authoritativePath: string;
+    if (opts?.authoritativeOutputPath) {
+      authoritativePath = opts.authoritativeOutputPath;
+    } else if (opts?.authoritativeOutputDir) {
+      authoritativePath = resolve(opts.authoritativeOutputDir, `authoritative-evidence-${candidateSha}.json`);
+    } else {
+      authoritativePath = resolve(process.cwd(), `artifacts/route-witness/authoritative-evidence-${candidateSha}.json`);
+    }
+
+    const authDir = resolve(authoritativePath, "..");
+    if (!existsSync(authDir)) {
+      mkdirSync(authDir, { recursive: true });
+    }
+    writeFileSync(
+      authoritativePath,
+      JSON.stringify({ ...results, evidenceScope: "authoritative_pipeline_artifact" }, null, 2),
+      "utf8"
+    );
+    console.log(`[Final Evidence] Authoritative SHA-bound artifact written to ${authoritativePath}`);
   }
-  const authoritativePath = resolve(artifactsEvidenceDir, `authoritative-evidence-${candidateSha}.json`);
-  writeFileSync(
-    authoritativePath,
-    JSON.stringify({ ...results, evidenceScope: "authoritative_pipeline_artifact" }, null, 2),
-    "utf8"
-  );
-  console.log(`[Final Evidence] Authoritative SHA-bound artifact written to ${authoritativePath}`);
 
   console.log(`  Tests: ${junit?.passed}/${junit?.total} passed`);
   console.log(`  Statements Coverage: ${coverage?.statementsPct}%`);

@@ -1,20 +1,20 @@
 {
   "schemaVersion": "1",
   "generatorVersion": "1.0.0",
-  "timestamp": "2026-10-22T19:05:49.089Z",
+  "timestamp": "2026-10-23T09:34:23.726Z",
   "pipelineUrl": "NOT_MEASURED",
-  "commitSha": "cb88d45b4744ec461476a48ec2707044e9afc111",
+  "commitSha": "9e2bc221d237ce5f80651d16a901d7789e187545",
   "imageDigest": "NOT_MEASURED",
   "cloudRunRevision": "NOT_MEASURED",
   "candidateUrl": "NOT_MEASURED",
   "witnessSummary": [
     {
-      "witnessId": "f19c3264c8942d49",
+      "witnessId": "7fe8e130d54e9ca4",
       "schemaVersion": "1",
       "generatorVersion": "1.0.0",
-      "timestamp": "2026-10-22T19:05:47.930Z",
-      "baselineSha": "7764db519ccad31263e76eac39b98f490db12a07",
-      "candidateSha": "cb88d45b4744ec461476a48ec2707044e9afc111",
+      "timestamp": "2026-10-23T09:31:00.708Z",
+      "baselineSha": "cb88d45b4744ec461476a48ec2707044e9afc111",
+      "candidateSha": "9e2bc221d237ce5f80651d16a901d7789e187545",
       "policyVersion": "1.0.0",
       "policyHash": "8255faa15a8078e85c6b4727b3c3ef56f1b41d6e41a3a7e7e06b343e893139f4",
       "fixtureVersion": "1.0.0",
@@ -59,12 +59,12 @@
       "dataDisclaimer": "All route and campus data used in RouteWitness demonstrations is synthetic (isSyntheticDemo: true). No real campus geometry, personal mobility data, or navigation history is stored or transmitted."
     },
     {
-      "witnessId": "fbf9aaba6c6b028b",
+      "witnessId": "d41b1a9ccb4d26fe",
       "schemaVersion": "1",
       "generatorVersion": "1.0.0",
-      "timestamp": "2026-10-22T19:05:47.930Z",
-      "baselineSha": "7764db519ccad31263e76eac39b98f490db12a07",
-      "candidateSha": "cb88d45b4744ec461476a48ec2707044e9afc111",
+      "timestamp": "2026-10-23T09:31:00.708Z",
+      "baselineSha": "cb88d45b4744ec461476a48ec2707044e9afc111",
+      "candidateSha": "9e2bc221d237ce5f80651d16a901d7789e187545",
       "policyVersion": "1.0.0",
       "policyHash": "8255faa15a8078e85c6b4727b3c3ef56f1b41d6e41a3a7e7e06b343e893139f4",
       "fixtureVersion": "1.0.0",
@@ -103,12 +103,12 @@
       "dataDisclaimer": "All route and campus data used in RouteWitness demonstrations is synthetic (isSyntheticDemo: true). No real campus geometry, personal mobility data, or navigation history is stored or transmitted."
     },
     {
-      "witnessId": "7c85469ed9713518",
+      "witnessId": "7cd9fcb573676e4b",
       "schemaVersion": "1",
       "generatorVersion": "1.0.0",
-      "timestamp": "2026-10-22T19:05:47.930Z",
-      "baselineSha": "7764db519ccad31263e76eac39b98f490db12a07",
-      "candidateSha": "cb88d45b4744ec461476a48ec2707044e9afc111",
+      "timestamp": "2026-10-23T09:31:00.708Z",
+      "baselineSha": "cb88d45b4744ec461476a48ec2707044e9afc111",
+      "candidateSha": "9e2bc221d237ce5f80651d16a901d7789e187545",
       "policyVersion": "1.0.0",
       "policyHash": "8255faa15a8078e85c6b4727b3c3ef56f1b41d6e41a3a7e7e06b343e893139f4",
       "fixtureVersion": "1.0.0",
@@ -153,12 +153,12 @@
       "dataDisclaimer": "All route and campus data used in RouteWitness demonstrations is synthetic (isSyntheticDemo: true). No real campus geometry, personal mobility data, or navigation history is stored or transmitted."
     },
     {
-      "witnessId": "190f3005a1cf9aab",
+      "witnessId": "db39ed4e5ba1f66b",
       "schemaVersion": "1",
       "generatorVersion": "1.0.0",
-      "timestamp": "2026-10-22T19:05:47.930Z",
-      "baselineSha": "7764db519ccad31263e76eac39b98f490db12a07",
-      "candidateSha": "cb88d45b4744ec461476a48ec2707044e9afc111",
+      "timestamp": "2026-10-23T09:31:00.708Z",
+      "baselineSha": "cb88d45b4744ec461476a48ec2707044e9afc111",
+      "candidateSha": "9e2bc221d237ce5f80651d16a901d7789e187545",
       "policyVersion": "1.0.0",
       "policyHash": "8255faa15a8078e85c6b4727b3c3ef56f1b41d6e41a3a7e7e06b343e893139f4",
       "fixtureVersion": "1.0.0",
@@ -203,35 +203,35 @@
       "label": "Origin and License Provenance",
       "status": "PASS",
       "evidenceStatus": "MEASURED",
-      "commitSha": "cb88d45b4744ec461476a48ec2707044e9afc111"
+      "commitSha": "9e2bc221d237ce5f80651d16a901d7789e187545"
     },
     {
       "gateId": "GATE-02-POLICY",
       "label": "Protected Policy Integrity",
       "status": "PASS",
       "evidenceStatus": "MEASURED",
-      "commitSha": "cb88d45b4744ec461476a48ec2707044e9afc111"
+      "commitSha": "9e2bc221d237ce5f80651d16a901d7789e187545"
     },
     {
       "gateId": "GATE-03-INVARIANTS",
       "label": "Route Invariant Verification",
       "status": "PASS",
       "evidenceStatus": "MEASURED",
-      "commitSha": "cb88d45b4744ec461476a48ec2707044e9afc111"
+      "commitSha": "9e2bc221d237ce5f80651d16a901d7789e187545"
     },
     {
       "gateId": "GATE-04-SECURITY",
       "label": "Dependency & Secret Scan",
       "status": "PASS",
       "evidenceStatus": "MEASURED",
-      "commitSha": "cb88d45b4744ec461476a48ec2707044e9afc111"
+      "commitSha": "9e2bc221d237ce5f80651d16a901d7789e187545"
     },
     {
       "gateId": "GATE-05-ACCESSIBILITY",
       "label": "Automated Axe & Contrast Audit",
       "status": "PASS",
       "evidenceStatus": "MEASURED",
-      "commitSha": "cb88d45b4744ec461476a48ec2707044e9afc111"
+      "commitSha": "9e2bc221d237ce5f80651d16a901d7789e187545"
     }
   ],
   "lifecycleEvidence": [
@@ -321,5 +321,5 @@
   "isSyntheticData": true,
   "dataDisclaimer": "All route and campus data used in RouteWitness demonstrations is synthetic (isSyntheticDemo: true). No real campus geometry, personal mobility data, or navigation history is stored or transmitted.",
   "nonCertificationDisclosure": "This receipt is an integrity-verified evidence bundle. It is not a legal, safety, or accessibility certification.",
-  "checksumSha256": "ab31aa036f708be270530ec46dab0c3dd2786225515651ae4a6967a77786e7dd"
+  "checksumSha256": "7b3d04a7be5ac1a57e8340d9e8a625871ea8660361421f91e422ee9272c4bcca"
 }

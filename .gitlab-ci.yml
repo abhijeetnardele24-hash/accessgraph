@@ -62,12 +62,35 @@ plan:impact-manifest:
     - if: $CI_COMMIT_BRANCH == "main"
 
 # ---------------------------------------------------------------------------
-# Stage 3: Verify (Invariants, Policy, Unit, Golden, and Accessibility)
+# Stage 3: Verify (Typecheck, Lint, Policy, Unit, Golden, Counterfactual, A11y)
 # ---------------------------------------------------------------------------
+verify:typecheck:
+  stage: verify
+  needs:
+    - provenance:license-and-origin
+  script:
+    - npm ci
+    - npm run typecheck
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+verify:lint:
+  stage: verify
+  needs:
+    - provenance:license-and-origin
+  script:
+    - npm ci
+    - npm run lint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
 verify:policy-integrity:
   stage: verify
   needs:
     - provenance:license-and-origin
+    - verify:typecheck
   script:
     - npm ci
     - npx tsx scripts/verify-policy-integrity.ts
@@ -79,6 +102,8 @@ verify:unit-tests:
   stage: verify
   needs:
     - provenance:license-and-origin
+    - verify:typecheck
+    - verify:lint
   script:
     - npm ci
     - npm test
@@ -87,6 +112,7 @@ verify:unit-tests:
     reports:
       junit: junit.xml
     paths:
+      - junit.xml
       - coverage/
     expire_in: 30 days
 
@@ -94,6 +120,7 @@ verify:golden-regression:
   stage: verify
   needs:
     - provenance:license-and-origin
+    - verify:typecheck
   script:
     - npm ci
     - npx vitest run tests/unit/routeWitness.golden.test.ts
@@ -102,6 +129,7 @@ verify:counterfactual-matrix:
   stage: verify
   needs:
     - plan:impact-manifest
+    - verify:typecheck
   script:
     - npm ci
     - npx tsx route-witness/cli/index.ts compare
@@ -117,6 +145,7 @@ verify:accessibility-axe:
   stage: verify
   needs:
     - provenance:license-and-origin
+    - verify:typecheck
   image: mcr.microsoft.com/playwright:v1.50.1-noble
   script:
     - npm ci
@@ -136,6 +165,7 @@ secure:dependency-audit:
   stage: secure
   needs:
     - provenance:license-and-origin
+    - verify:typecheck
   script:
     - npm ci
     - npm audit --omit=dev --audit-level=high
@@ -144,6 +174,7 @@ secure:secret-scan:
   stage: secure
   needs:
     - provenance:license-and-origin
+    - verify:typecheck
   script:
     - npm ci
     - node scripts/security-scan.cjs
@@ -164,6 +195,8 @@ package:container-image:
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
   needs:
+    - verify:typecheck
+    - verify:lint
     - verify:unit-tests
     - verify:policy-integrity
     - verify:counterfactual-matrix
@@ -175,10 +208,12 @@ package:container-image:
     - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" -t "$CI_REGISTRY_IMAGE:latest" .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
     - docker push "$CI_REGISTRY_IMAGE:latest"
-    - echo "IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA)" > image_digest.env
+    - echo "OCI_IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA)" > image_digest.env
   artifacts:
     reports:
       dotenv: image_digest.env
+    paths:
+      - image_digest.env
   rules:
     - if: '$CI_REGISTRY_USER && $CI_REGISTRY_PASSWORD && ($CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event")'
 
@@ -199,11 +234,26 @@ deploy:candidate-cloud-run:
     - cat deploy_output.txt
     - CANDIDATE_URL=$(grep "https://" deploy_output.txt | tail -n 1 | tr -d ' ')
     - echo "CANDIDATE_URL=${CANDIDATE_URL}" > candidate.env
+    - echo "CLOUD_RUN_REVISION=rev-${CI_COMMIT_SHORT_SHA}" >> candidate.env
+    - mkdir -p artifacts/route-witness
+    - |
+      cat <<EOF > artifacts/route-witness/deployment-metadata.json
+      {
+        "timestamp": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
+        "serviceName": "${CLOUD_RUN_SERVICE}",
+        "revision": "rev-${CI_COMMIT_SHORT_SHA}",
+        "candidateUrl": "${CANDIDATE_URL}",
+        "commitSha": "${CI_COMMIT_SHA}",
+        "status": "DEPLOYED_0_PCT_TRAFFIC"
+      }
+      EOF
   artifacts:
     reports:
       dotenv: candidate.env
     paths:
+      - candidate.env
       - deploy_output.txt
+      - artifacts/route-witness/deployment-metadata.json
   rules:
     - if: '$GCP_PROJECT_ID && $GCP_SA_KEY && ($CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event")'
 
@@ -219,6 +269,9 @@ replay:deployed-witness:
   script:
     - npm ci
     - npx tsx scripts/replay-deployment.ts
+  artifacts:
+    paths:
+      - artifacts/route-witness/deployed-replay-results.json
   rules:
     - if: '$GCP_PROJECT_ID && $GCP_SA_KEY && ($CI_COMMIT_BRANCH == "main" || $CI_PIPELINE_SOURCE == "merge_request_event")'
 
@@ -276,11 +329,28 @@ monitor:production-smoke:
 evidence:release-receipt:
   stage: evidence
   needs:
-    - verify:unit-tests
-    - verify:policy-integrity
-    - verify:counterfactual-matrix
-    - verify:accessibility-axe
-    - secure:secret-scan
+    - job: verify:typecheck
+    - job: verify:lint
+    - job: plan:impact-manifest
+      artifacts: true
+    - job: verify:unit-tests
+      artifacts: true
+    - job: verify:policy-integrity
+    - job: verify:counterfactual-matrix
+      artifacts: true
+    - job: verify:accessibility-axe
+      artifacts: true
+    - job: secure:secret-scan
+      artifacts: true
+    - job: package:container-image
+      artifacts: true
+      optional: true
+    - job: deploy:candidate-cloud-run
+      artifacts: true
+      optional: true
+    - job: replay:deployed-witness
+      artifacts: true
+      optional: true
   script:
     - npm ci
     - npx tsx route-witness/cli/index.ts receipt

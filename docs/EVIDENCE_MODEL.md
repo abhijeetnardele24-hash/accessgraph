@@ -19,7 +19,7 @@ RouteWitness treats software releases for accessible transit and wayfinding as s
 
 | Status | Definition | Example Usage |
 |---|---|---|
-| `MEASURED` | Verified directly by machine execution, test assertions, or HTTP probe. | Route connectivity, Vitest 83 tests passed, Axe automated accessibility scan, /healthz probe. |
+| `MEASURED` | Verified directly by machine execution, test assertions, or HTTP probe. | Route connectivity, Vitest 85 tests passed, Axe automated accessibility scan, /healthz probe. |
 | `INFERRED` | Formed through probabilistic analysis or heuristic modeling. | GitLab Duo risk hypotheses regarding user impact. |
 | `NOT_MEASURED` | Feature or check was not executed (due to tier absence or configuration). | Optional cloud scanners or disabled third-party integrations. |
 | `HUMAN_APPROVAL_REQUIRED` | An outward-facing safety or production promotion decision that must be made by an authorized human maintainer. | Shifting traffic to 100% on production Cloud Run deployment. |

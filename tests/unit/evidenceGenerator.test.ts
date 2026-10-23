@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync } from "fs";
+import { mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync, readdirSync } from "fs";
 import { tmpdir } from "os";
 import { join, resolve } from "path";
 import {
@@ -123,6 +123,7 @@ describe("Evidence Generator & Regression Guardrails", () => {
         junitPath,
         playwrightPath,
         outputPath: outPath,
+        authoritativeOutputDir: tempDir,
       });
     }).toThrow(/STALE ARTIFACT: release-receipt.json commitSha/);
   });
@@ -150,6 +151,7 @@ describe("Evidence Generator & Regression Guardrails", () => {
         junitPath,
         playwrightPath,
         outputPath: outPath,
+        authoritativeOutputDir: tempDir,
       });
     }).toThrow(/STALE ARTIFACT: docs\/security-audit.json commitSha/);
   });
@@ -175,6 +177,7 @@ describe("Evidence Generator & Regression Guardrails", () => {
         junitPath,
         playwrightPath: missingPlaywrightPath,
         outputPath: outPath,
+        authoritativeOutputDir: tempDir,
       });
     }).toThrow(/Missing or malformed Playwright results artifact/);
   });
@@ -201,6 +204,7 @@ describe("Evidence Generator & Regression Guardrails", () => {
         junitPath,
         playwrightPath,
         outputPath: outPath,
+        authoritativeOutputDir: tempDir,
       });
     }).toThrow(/Playwright E2E tests failed/);
   });
@@ -229,6 +233,7 @@ describe("Evidence Generator & Regression Guardrails", () => {
         junitPath,
         playwrightPath,
         outputPath: outPath,
+        authoritativeOutputDir: tempDir,
       });
 
       expect(evidence.cloudRun.status).toBe("NOT_MEASURED");
@@ -237,6 +242,96 @@ describe("Evidence Generator & Regression Guardrails", () => {
     } finally {
       if (origCandidate !== undefined) process.env.CANDIDATE_URL = origCandidate;
       else delete process.env.CANDIDATE_URL;
+    }
+  });
+
+  it("strengthens release evidence: candidate URL alone does NOT create RELEASE=COVERED", () => {
+    const origCandidate = process.env.CANDIDATE_URL;
+    const origRevision = process.env.CLOUD_RUN_REVISION;
+    const origDigest = process.env.OCI_IMAGE_DIGEST;
+    try {
+      // 1. Candidate URL alone without revision, digest, or deployment metadata
+      process.env.CANDIDATE_URL = "https://routewitness-rev1-xyz.a.run.app";
+      delete process.env.CLOUD_RUN_REVISION;
+      delete process.env.OCI_IMAGE_DIGEST;
+
+      const receiptPath = join(tempDir, "receipt.json");
+      const securityPath = join(tempDir, "security.json");
+      const junitPath = join(tempDir, "junit.xml");
+      const playwrightPath = join(tempDir, "playwright.json");
+      const outPath = join(tempDir, "output.json");
+
+      writeFileSync(receiptPath, JSON.stringify(createValidReceipt(currentCandidateSha)));
+      writeFileSync(securityPath, JSON.stringify(createValidSecurityAudit(currentCandidateSha)));
+      writeFileSync(junitPath, createValidJunit(0));
+      writeFileSync(playwrightPath, JSON.stringify(createValidPlaywright(0)));
+
+      const evidenceWithoutCredentials = generateFinalEvidence({
+        strict: false,
+        candidateSha: currentCandidateSha,
+        baselineSha: currentBaselineSha,
+        receiptPath,
+        securityPath,
+        junitPath,
+        playwrightPath,
+        outputPath: outPath,
+        authoritativeOutputDir: tempDir,
+      });
+
+      expect(evidenceWithoutCredentials.stages.release.status).toBe("NOT_COVERED");
+      expect(evidenceWithoutCredentials.stages.release.evidenceStatus).toBe("NOT_MEASURED");
+      expect(evidenceWithoutCredentials.cloudRun.status).toBe("NOT_MEASURED");
+
+      // 2. Candidate URL with non-strict digest format must still be rejected
+      process.env.CLOUD_RUN_REVISION = "rev-01234567";
+      process.env.OCI_IMAGE_DIGEST = "invalid-non-sha-digest";
+
+      const evidenceBadDigest = generateFinalEvidence({
+        strict: false,
+        candidateSha: currentCandidateSha,
+        baselineSha: currentBaselineSha,
+        receiptPath,
+        securityPath,
+        junitPath,
+        playwrightPath,
+        outputPath: outPath,
+        authoritativeOutputDir: tempDir,
+      });
+
+      expect(evidenceBadDigest.stages.package.status).toBe("PARTIAL");
+      expect(evidenceBadDigest.stages.release.status).toBe("NOT_COVERED");
+
+      // 3. Genuine full evidence: valid URL, revision, strict OCI digest, and deployment metadata matching commit
+      process.env.OCI_IMAGE_DIGEST = "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+      const deployMetaPath = join(tempDir, "deployment-metadata.json");
+      writeFileSync(deployMetaPath, JSON.stringify({
+        commitSha: currentCandidateSha,
+        status: "DEPLOYED_0_PCT_TRAFFIC",
+      }));
+
+      const evidenceVerified = generateFinalEvidence({
+        strict: false,
+        candidateSha: currentCandidateSha,
+        baselineSha: currentBaselineSha,
+        receiptPath,
+        securityPath,
+        junitPath,
+        playwrightPath,
+        deploymentMetadataPath: deployMetaPath,
+        outputPath: outPath,
+        authoritativeOutputDir: tempDir,
+      });
+
+      expect(evidenceVerified.stages.release.status).toBe("COVERED");
+      expect(evidenceVerified.stages.release.evidenceStatus).toBe("MEASURED");
+      expect(evidenceVerified.cloudRun.status).toBe("DEPLOYED_0_PCT_TRAFFIC");
+    } finally {
+      if (origCandidate !== undefined) process.env.CANDIDATE_URL = origCandidate;
+      else delete process.env.CANDIDATE_URL;
+      if (origRevision !== undefined) process.env.CLOUD_RUN_REVISION = origRevision;
+      else delete process.env.CLOUD_RUN_REVISION;
+      if (origDigest !== undefined) process.env.OCI_IMAGE_DIGEST = origDigest;
+      else delete process.env.OCI_IMAGE_DIGEST;
     }
   });
 
@@ -267,6 +362,7 @@ describe("Evidence Generator & Regression Guardrails", () => {
         junitPath,
         playwrightPath,
         outputPath: outPath,
+        authoritativeOutputDir: tempDir,
       });
 
       expect(evidence.cloudRun.status).toBe("NOT_MEASURED");
@@ -274,6 +370,8 @@ describe("Evidence Generator & Regression Guardrails", () => {
       expect(evidence.stages.release.evidenceStatus).toBe("NOT_MEASURED");
       expect(evidence.stages.monitor.status).toBe("NOT_COVERED");
       expect(evidence.stages.monitor.evidenceStatus).toBe("NOT_MEASURED");
+      expect(evidence.stages.configure.status).toBe("PARTIAL");
+      expect(evidence.stages.configure.method).toContain("remote GitLab branch protection & approval rules NOT_MEASURED");
     } finally {
       if (origCandidate !== undefined) process.env.CANDIDATE_URL = origCandidate;
       else delete process.env.CANDIDATE_URL;
@@ -303,6 +401,7 @@ describe("Evidence Generator & Regression Guardrails", () => {
       junitPath,
       playwrightPath,
       outputPath: outPath,
+      authoritativeOutputDir: tempDir,
     });
 
     expect(evidence.verificationSummary.syntheticDataDisclosurePresent).toBe(true);
@@ -310,12 +409,48 @@ describe("Evidence Generator & Regression Guardrails", () => {
     expect(evidence.evidenceScope).toBe("local_verification_snapshot");
   });
 
-  it("validates that GitLab Duo custom flow YAML satisfies structural schema requirements", () => {
+  it("strictly isolates test outputs: no file is created outside the test temp directory", () => {
+    const repoArtifactsDir = resolve(process.cwd(), "artifacts/route-witness");
+    const initialFiles = existsSync(repoArtifactsDir) ? readdirSync(repoArtifactsDir) : [];
+
+    const receiptPath = join(tempDir, "receipt.json");
+    const securityPath = join(tempDir, "security.json");
+    const junitPath = join(tempDir, "junit.xml");
+    const playwrightPath = join(tempDir, "playwright.json");
+    const outPath = join(tempDir, "output.json");
+
+    writeFileSync(receiptPath, JSON.stringify(createValidReceipt(currentCandidateSha)));
+    writeFileSync(securityPath, JSON.stringify(createValidSecurityAudit(currentCandidateSha)));
+    writeFileSync(junitPath, createValidJunit(0));
+    writeFileSync(playwrightPath, JSON.stringify(createValidPlaywright(0)));
+
+    generateFinalEvidence({
+      strict: false,
+      candidateSha: currentCandidateSha,
+      baselineSha: currentBaselineSha,
+      receiptPath,
+      securityPath,
+      junitPath,
+      playwrightPath,
+      outputPath: outPath,
+      authoritativeOutputDir: tempDir,
+    });
+
+    // Verify generated files exist inside tempDir
+    expect(existsSync(outPath)).toBe(true);
+    expect(existsSync(join(tempDir, `authoritative-evidence-${currentCandidateSha}.json`))).toBe(true);
+
+    // Verify repository canonical directory was not mutated
+    const postFiles = existsSync(repoArtifactsDir) ? readdirSync(repoArtifactsDir) : [];
+    expect(postFiles).toEqual(initialFiles);
+  });
+
+  it("performs LOCAL_STRUCTURE_CHECK_ONLY on GitLab Duo custom flow YAML", () => {
     const flowPath = resolve(process.cwd(), ".gitlab/duo/flows/route-witness.yml");
     expect(existsSync(flowPath)).toBe(true);
     const content = readFileSync(flowPath, "utf8");
 
-    // Verify v1 schema keys
+    // Local structural smoke test (LOCAL_STRUCTURE_CHECK_ONLY)
     expect(content).toContain('version: "v1"');
     expect(content).toContain("components:");
     expect(content).toContain("name: \"impact_analyst\"");
